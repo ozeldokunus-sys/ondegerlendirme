@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gelişim Tarama Sistemi</title>
+    <title>Gelişim Tarama ve Takip Sistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -12,13 +12,21 @@
             -webkit-tap-highlight-color: transparent;
             background-color: #F8FAFC;
             margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
         }
         .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-active:active { transform: scale(0.96); }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        /* İnce kaydırma çubuğu */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        
         input, textarea { font-size: 16px !important; }
+        .question-card { transition: all 0.3s ease; }
+        .answered-card { border-color: #E0E7FF; background-color: #F9FAFB; }
     </style>
 </head>
 <body>
@@ -27,7 +35,7 @@
 
     <script>
         // --- YAPILANDIRMA ---
-        const apiKey = ""; 
+        const apiKey = ""; // Sistem tarafından sağlanır
         const formspreeEndpoint = "https://formspree.io/f/mpqoblva";
 
         const DATA = {
@@ -107,9 +115,9 @@
                 <div class="min-h-screen flex items-center justify-center p-6 fade-in">
                     <div class="max-w-3xl w-full text-center space-y-12">
                         <div class="space-y-4">
-                            <span class="text-indigo-600 font-bold text-sm tracking-widest uppercase">Özel Eğitim & Gelişim Takibi</span>
-                            <h1 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Çocuğunuzun Gelişimini <br/>Birlikte İzleyelim</h1>
-                            <p class="text-slate-500 text-lg max-w-xl mx-auto font-medium">Uzmanlarımız tarafından hazırlanan tarama testi ile ilk adımı atın.</p>
+                            <span class="text-indigo-600 font-bold text-sm tracking-widest uppercase font-black">Özel Eğitim & Gelişim Takibi</span>
+                            <h1 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Çocuğunuzun Gelişimini <br/><span class="text-indigo-600">Birlikte İzleyelim</span></h1>
+                            <p class="text-slate-500 text-lg max-w-xl mx-auto font-medium">Uzmanlarımız tarafından hazırlanan tarama testi ile doğru adımı atın.</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
                             <button onclick="startQuiz('preschool')" class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 hover:border-indigo-400 text-left transition-all btn-active group">
@@ -117,14 +125,14 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A5 5 0 0 1 12 10a5 5 0 0 1 2.5-8"/><path d="M12 10v10"/><path d="M16 7a5 5 0 0 1 3 9 5 5 0 0 1-7 1"/><path d="M8 7a5 5 0 0 0-3 9 5 5 0 0 0 7 1"/></svg>
                                 </div>
                                 <h3 class="text-2xl font-black text-slate-800">Okul Öncesi</h3>
-                                <p class="text-slate-500 text-sm mt-2 font-medium">Sosyal etkileşim ve temel gelişim taraması.</p>
+                                <p class="text-slate-500 text-sm mt-2 font-medium">3-6 Yaş Grubu Sosyal Etkileşim Taraması.</p>
                             </button>
                             <button onclick="startQuiz('primary')" class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 hover:border-indigo-400 text-left transition-all btn-active group">
                                 <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                                 </div>
                                 <h3 class="text-2xl font-black text-slate-800">İlkokul Grubu</h3>
-                                <p class="text-slate-500 text-sm mt-2 font-medium">Öğrenme güçlüğü ve akademik uyum analizi.</p>
+                                <p class="text-slate-500 text-sm mt-2 font-medium">7-12 Yaş Grubu Akademik ve Sosyal Tarama.</p>
                             </button>
                         </div>
                     </div>
@@ -141,7 +149,7 @@
             
             app.innerHTML = `
                 <div class="min-h-screen p-4 md:p-8 flex flex-col items-center fade-in">
-                    <div class="max-w-2xl w-full bg-white/90 backdrop-blur p-4 md:p-6 rounded-2xl shadow-md border border-slate-100 sticky top-4 z-20 mb-8">
+                    <div class="max-w-2xl w-full bg-white/90 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-md border border-slate-100 sticky top-4 z-20 mb-8">
                         <div class="flex justify-between items-end mb-3">
                             <div>
                                 <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">BÖLÜM ${state.currentSection + 1} / ${sections.length}</p>
@@ -153,22 +161,39 @@
                             <div class="progress-bar bg-indigo-600 h-full rounded-full" style="width: ${progress}%"></div>
                         </div>
                     </div>
-                    <div class="max-w-2xl w-full space-y-6 pb-32">
-                        ${sec.questions.map(q => `
-                            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <div class="max-w-2xl w-full space-y-6 pb-40">
+                        ${sec.questions.map((q, index) => `
+                            <div id="q-box-${q.id}" class="question-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 ${state.answers[q.id] !== undefined ? 'answered-card' : ''}">
                                 <p class="text-lg font-bold text-slate-800 mb-8 leading-snug">${q.text}</p>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <button onclick="setAnswer('${q.id}', true)" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
-                                    <button onclick="setAnswer('${q.id}', false)" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
+                                    <button onclick="handleResponse('${q.id}', true, ${index})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
+                                    <button onclick="handleResponse('${q.id}', false, ${index})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
                                 </div>
                             </div>`).join('')}
                     </div>
                     <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
-                        <button id="nextBtn" ${!allAnswered ? 'disabled' : ''} onclick="nextStep()" class="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-bold text-lg shadow-2xl transition-all btn-active disabled:opacity-20">
-                            ${state.currentSection === sections.length - 1 ? 'Başvuruyu Tamamla' : 'Sonraki Bölüme Geç'}
+                        <button id="nextBtn" ${!allAnswered ? 'disabled' : ''} onclick="nextStep()" class="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-bold text-lg shadow-2xl transition-all btn-active disabled:opacity-20 flex items-center justify-center gap-3">
+                            ${state.currentSection === sections.length - 1 ? 'Başvuruyu Tamamla' : 'Sonraki Bölüm'}
                         </button>
                     </div>
                 </div>`;
+        }
+
+        function handleResponse(id, val, index) {
+            state.answers[id] = val;
+            render();
+            
+            const sections = DATA[state.ageGroup];
+            const currentQuestions = sections[state.currentSection].questions;
+            
+            // Cevap verdikten sonra bir sonraki soruya kaydır
+            if (index < currentQuestions.length - 1) {
+                const nextQId = currentQuestions[index + 1].id;
+                setTimeout(() => {
+                    const nextEl = document.getElementById(`q-box-${nextQId}`);
+                    if (nextEl) nextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
         }
 
         function renderContact(app) {
@@ -177,27 +202,27 @@
                     <div class="max-w-xl w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
                         <div class="bg-indigo-600 p-10 text-white">
                             <h2 class="text-3xl font-black mb-2">Son Bir Adım</h2>
-                            <p class="opacity-90 font-medium text-sm">Yanıtlarınız hazırlandı. Uzmanımızdan geri dönüş almak için bilgilerinizi iletin.</p>
+                            <p class="opacity-90 font-medium text-sm">Analiz sonuçlarınız hazırlandı. Uzmanımızın size ulaşabilmesi için bilgilerinizi iletin.</p>
                         </div>
                         <div class="p-10 space-y-5">
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Ad Soyad</label>
-                                <input id="nameInp" placeholder="Ahmet Yılmaz" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all" value="${state.formData.name}">
+                                <input id="nameInp" placeholder="Ahmet Yılmaz" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all font-medium" value="${state.formData.name}">
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Telefon (05xx...)</label>
-                                <input id="phoneInp" type="tel" maxlength="11" placeholder="05xx xxx xx xx" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all" value="${state.formData.phone}">
-                                <p id="phoneError" class="text-red-500 text-[10px] font-bold mt-1 ml-2 hidden">Geçerli bir 05xx numarası giriniz.</p>
+                                <input id="phoneInp" type="tel" maxlength="11" placeholder="05xx xxx xx xx" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all font-medium" value="${state.formData.phone}">
+                                <p id="phoneError" class="text-red-500 text-[10px] font-bold mt-1 ml-2 hidden">Lütfen geçerli bir numara giriniz.</p>
                             </div>
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Not (Opsiyonel)</label>
-                                <textarea id="noteInp" placeholder="Belirtmek istediğiniz bir durum var mı?" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none h-24 resize-none transition-all">${state.formData.note}</textarea>
+                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Notunuz (Opsiyonel)</label>
+                                <textarea id="noteInp" placeholder="Belirtmek istediğiniz bir durum var mı?" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none h-24 resize-none transition-all font-medium">${state.formData.note}</textarea>
                             </div>
-                            <label class="flex items-start gap-3 cursor-pointer p-2">
+                            <label class="flex items-start gap-3 cursor-pointer p-2 group">
                                 <input id="kvkkCheck" type="checkbox" ${state.formData.kvkk ? 'checked' : ''} class="mt-1 w-5 h-5 accent-indigo-600">
-                                <span class="text-[11px] text-slate-500 font-medium leading-tight">KVKK aydınlatma metnini okudum ve verilerimin işlenmesini kabul ediyorum.</span>
+                                <span class="text-[11px] text-slate-500 font-medium leading-tight group-hover:text-slate-700">Verilerimin işlenmesini ve benimle iletişime geçilmesini kabul ediyorum.</span>
                             </label>
-                            <button id="submitBtn" disabled onclick="finalSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-indigo-100 btn-active disabled:opacity-30">Analizi Uzmana Gönder</button>
+                            <button id="submitBtn" disabled onclick="finalSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-indigo-100 btn-active disabled:opacity-30">Analizi Gönder</button>
                         </div>
                     </div>
                 </div>`;
@@ -214,7 +239,7 @@
                 const phoneValid = /^05\d{9}$/.test(phone);
                 const isFormValid = state.formData.name.trim().length > 1 && phoneValid && state.formData.kvkk;
                 sBtn.disabled = !isFormValid;
-                sBtn.innerText = state.isSubmitting ? 'Gönderiliyor...' : 'Analizi Uzmana Gönder';
+                sBtn.innerText = state.isSubmitting ? 'Gönderiliyor...' : 'Analizi Gönder';
 
                 let err = (phone.length > 0 && phone[0] !== '0') || (phone.length >= 2 && !phone.startsWith('05')) || (phone.length === 11 && !phoneValid);
                 if (err) { pErr.classList.remove('hidden'); pInp.classList.add('border-red-300'); }
@@ -236,39 +261,19 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                         </div>
                         <div class="space-y-4">
-                            <h2 class="text-3xl font-black text-slate-900">Başvurunuz Alındı</h2>
-                            <p class="text-slate-600 font-medium leading-relaxed">Yanıtlarınız uzman ekibimize iletildi. En kısa sürede sizinle iletişime geçecektir.</p>
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tight">Başvurunuz Tamamlandı</h2>
+                            <p class="text-slate-600 font-medium leading-relaxed">Yanıtlarınız uzman ekibimize iletildi. En kısa sürede sizinle iletişime geçilecektir.</p>
                         </div>
                         <button onclick="location.reload()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold btn-active">Başa Dön</button>
                     </div>
                 </div>`;
         }
 
-        // --- MANTIKSAL FONKSİYONLAR ---
-        function startQuiz(group) { 
-            state.ageGroup = group; 
-            state.view = 'quiz'; 
-            render(); 
-            window.scrollTo(0, 0); 
-        }
-
-        function setAnswer(id, val) { 
-            state.answers[id] = val; 
-            render(); 
-        }
-
+        function startQuiz(group) { state.ageGroup = group; state.view = 'quiz'; render(); window.scrollTo(0,0); }
         function nextStep() {
             const sections = DATA[state.ageGroup];
-            if (state.currentSection < sections.length - 1) { 
-                state.currentSection++; 
-                render(); 
-                window.scrollTo(0, 0); 
-            }
-            else { 
-                state.view = 'contact'; 
-                render(); 
-                window.scrollTo(0, 0); 
-            }
+            if (state.currentSection < sections.length - 1) { state.currentSection++; render(); window.scrollTo(0,0); }
+            else { state.view = 'contact'; render(); window.scrollTo(0,0); }
         }
 
         async function finalSubmit() {
@@ -282,40 +287,36 @@
                 return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
             }).join('\n');
 
-            // --- GİZLİ AI ANALİZİ ---
-            let aiReport = "AI Analizi hazırlanıyor...";
+            // 1. Arka Planda Gizli AI Analizi (Bitene kadar bekler)
+            let aiAnalysis = "";
             try {
-                const aiPrompt = `Sen bir uzman çocuk gelişimcisin. Bu tarama testindeki EVET yanıtlarını analiz ederek profesyonel bir rapor oluştur. Grup: ${state.ageGroup} Yanıtlar: ${answersText}`;
+                const aiPrompt = `Sen bir çocuk gelişim uzmanısın. Aşağıdaki tarama testi yanıtlarını analiz et ve sadece uzman için rapor hazırla. EVET yanıtları gelişimsel risk işaretidir. Yanıtlar: ${answersText}`;
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: aiPrompt }] }] })
                 });
                 const result = await response.json();
-                aiReport = result.candidates?.[0]?.content?.parts?.[0]?.text || aiReport;
-            } catch (e) { console.error("AI error"); }
+                aiAnalysis = result.candidates?.[0]?.content?.parts?.[0]?.text || "Analiz oluşturulamadı.";
+            } catch (e) { aiAnalysis = "AI Hatası."; }
 
-            // --- FORMSPREE GÖNDERİM ---
+            // 2. Formspree Gönderimi
             try {
                 await fetch(formspreeEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ 
-                        subject: `Tarama Başvurusu: ${state.formData.name}`,
+                        _subject: `Yeni Gelişim Başvurusu: ${state.formData.name}`,
                         ad_soyad: state.formData.name,
-                        tel: state.formData.phone,
-                        mesaj: state.formData.note,
-                        grup: state.ageGroup,
-                        UZMAN_ANALIZI: aiReport,
-                        ham_veriler: answersText 
+                        telefon: state.formData.phone,
+                        ebeveyn_notu: state.formData.note || "Yok",
+                        yas_grubu: state.ageGroup,
+                        AI_ANALIZ_RAPORU: aiAnalysis,
+                        test_yanitlari: answersText 
                     })
                 });
                 state.view = 'success';
-                window.scrollTo(0, 0); 
-            } catch (err) { 
-                state.view = 'success'; 
-                window.scrollTo(0, 0);
-            }
+            } catch (err) { state.view = 'success'; }
             finally { state.isSubmitting = false; render(); }
         }
 
