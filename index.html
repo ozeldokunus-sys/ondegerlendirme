@@ -65,8 +65,8 @@
 
     <script>
         // --- YAPILANDIRMA ---
-        // Webhook URL'niz değişken adı olarak değil, değer olarak tanımlandı.
         const makeWebhookUrl = "https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz"; 
+        const apiKey = ""; // Runtime provides this
 
         const DATA = {
             preschool: [
@@ -173,7 +173,20 @@
         }
 
         function renderSuccess(app) {
-            app.innerHTML = `<div class="min-h-screen p-6 flex items-center justify-center text-center fade-in"><div class="max-w-md w-full bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-100 space-y-8"><div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div class="space-y-4"><h2 class="text-3xl font-black text-slate-900 tracking-tight">Başvurunuz Alındı</h2><p class="text-slate-600 font-medium leading-relaxed">Yanıtlarınız uzmanımıza iletildi. En kısa sürede size geri dönüş sağlanacaktır.</p></div><button onclick="window.location.href='https://ozeldokunus.com'" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold btn-active">Anasayfaya Dön</button></div></div>`;
+            app.innerHTML = `
+                <div class="min-h-screen p-6 flex items-center justify-center text-center fade-in">
+                    <div class="max-w-md w-full bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-100 space-y-8">
+                        <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </div>
+                        <div class="space-y-4">
+                            <h2 class="text-3xl font-black text-slate-900 tracking-tight">Başvurunuz Alındı</h2>
+                            <p class="text-slate-600 font-medium leading-relaxed">Yanıtlarınız uzmanımıza iletildi. En kısa sürede size geri dönüş sağlanacaktır.</p>
+                        </div>
+                        <!-- window.top.location.href kullanılarak gömülü sitelerde ana sekmenin yönlendirilmesi sağlandı -->
+                        <button onclick="window.top.location.href='https://ozeldokunus.com'" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold btn-active">Anasayfaya Dön</button>
+                    </div>
+                </div>`;
         }
 
         function startQuiz(group) { state.ageGroup = group; state.view = 'quiz'; render(); window.scrollTo(0,0); }
