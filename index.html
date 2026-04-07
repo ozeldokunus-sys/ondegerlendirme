@@ -20,22 +20,66 @@
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* İnce kaydırma çubuğu */
+        /* Kaydırma çubuğu */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
         
         input, textarea { font-size: 16px !important; }
         .question-card { transition: all 0.3s ease; }
         .answered-card { border-color: #E0E7FF; background-color: #F9FAFB; }
+
+        /* Modal Stili */
+        .modal-overlay { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(4px); 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            z-index: 100; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+        }
+        .modal-active { display: flex; }
     </style>
 </head>
 <body>
 
     <div id="app"></div>
 
+    <!-- KVKK Modal -->
+    <div id="kvkkModal" class="modal-overlay" onclick="closeModal()">
+        <div class="bg-white w-full max-w-2xl max-h-[80vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col fade-in" onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="text-xl font-black text-slate-800 tracking-tight">KVKK Aydınlatma Metni</h3>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold hover:bg-slate-300 transition-colors">&times;</button>
+            </div>
+            <div class="p-8 overflow-y-auto text-slate-600 text-sm leading-relaxed space-y-4">
+                <p><strong>Özel Dokunuş Eğitim Danışmanlık</strong> olarak, 6698 Sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, veri sorumlusu sıfatıyla sizleri bilgilendirmek isteriz.</p>
+                
+                <h4 class="font-bold text-slate-800">1. Kişisel Verilerin İşlenme Amacı</h4>
+                <p>Gelişim tarama testi kapsamında topladığımız ad-soyad, iletişim bilgileri ve çocuğunuzun gelişimine dair verdiğiniz yanıtlar; analiz süreçlerinin yürütülmesi, ön değerlendirme raporunun hazırlanması ve size geri dönüş sağlanması amaçlarıyla sınırlı olarak işlenmektedir.</p>
+                
+                <h4 class="font-bold text-slate-800">2. Veri İşleme Şartları</h4>
+                <p>Bu veriler, "ilgili kişinin temel hak ve özgürlüklerine zarar vermemek kaydıyla, veri sorumlusunun meşru menfaatleri için veri işlenmesinin zorunlu olması" ve "bir sözleşmenin kurulması veya ifasıyla doğrudan doğruya ilgili olması" hukuki sebeplerine dayalı olarak işlenmektedir.</p>
+                
+                <h4 class="font-bold text-slate-800">3. Verilerin Aktarılması</h4>
+                <p>Kişisel verileriniz, tarama sonuçlarının size ulaştırılması ve analizin yapılması için gerekli teknik altyapı sağlayıcıları (Formspree, Gemini AI API) dışında hiçbir üçüncü taraf veya kurumla paylaşılmaz ve ticari amaçla kullanılmaz.</p>
+                
+                <h4 class="font-bold text-slate-800">4. Haklarınız</h4>
+                <p>KVKK’nın 11. maddesi uyarınca; verilerinizin işlenip işlenmediğini öğrenme, yanlış işlenmişse düzeltilmesini isteme ve verilerinizin silinmesini talep etme haklarına sahipsiniz. Taleplerinizi <strong>ozeldokunus@gmail.com</strong> üzerinden bize iletebilirsiniz.</p>
+                
+                <p class="pt-4 text-xs italic">Formu onaylayarak yukarıdaki şartları kabul etmiş ve verilerinizin ön değerlendirme amacıyla işlenmesine açık rıza göstermiş sayılırsınız.</p>
+            </div>
+            <div class="p-6 border-t border-slate-100 bg-slate-50 text-center">
+                <button onclick="closeModal()" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold btn-active">Anladım</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- YAPILANDIRMA ---
-        const apiKey = ""; // Sistem tarafından sağlanır
+        const apiKey = ""; 
         const formspreeEndpoint = "https://formspree.io/f/mpqoblva";
 
         const DATA = {
@@ -186,7 +230,6 @@
             const sections = DATA[state.ageGroup];
             const currentQuestions = sections[state.currentSection].questions;
             
-            // Cevap verdikten sonra bir sonraki soruya kaydır
             if (index < currentQuestions.length - 1) {
                 const nextQId = currentQuestions[index + 1].id;
                 setTimeout(() => {
@@ -196,31 +239,36 @@
             }
         }
 
+        function openModal() { document.getElementById('kvkkModal').classList.add('modal-active'); }
+        function closeModal() { document.getElementById('kvkkModal').classList.remove('modal-active'); }
+
         function renderContact(app) {
             app.innerHTML = `
                 <div class="min-h-screen p-4 flex items-center justify-center fade-in">
                     <div class="max-w-xl w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
                         <div class="bg-indigo-600 p-10 text-white">
-                            <h2 class="text-3xl font-black mb-2">Son Bir Adım</h2>
-                            <p class="opacity-90 font-medium text-sm">Analiz sonuçlarınız hazırlandı. Uzmanımızın size ulaşabilmesi için bilgilerinizi iletin.</p>
+                            <h2 class="text-3xl font-black mb-2 text-white">Son Bir Adım</h2>
+                            <p class="opacity-90 font-medium text-sm text-indigo-50">Analiz sonuçlarınız hazırlandı. Uzmanımızın size ulaşabilmesi için bilgilerinizi iletin.</p>
                         </div>
                         <div class="p-10 space-y-5">
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Ad Soyad</label>
-                                <input id="nameInp" placeholder="Ahmet Yılmaz" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all font-medium" value="${state.formData.name}">
+                                <input id="nameInp" placeholder="Ahmet Yılmaz" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all font-medium text-slate-800" value="${state.formData.name}">
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Telefon (05xx...)</label>
-                                <input id="phoneInp" type="tel" maxlength="11" placeholder="05xx xxx xx xx" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all font-medium" value="${state.formData.phone}">
+                                <input id="phoneInp" type="tel" maxlength="11" placeholder="05xx xxx xx xx" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all font-medium text-slate-800" value="${state.formData.phone}">
                                 <p id="phoneError" class="text-red-500 text-[10px] font-bold mt-1 ml-2 hidden">Lütfen geçerli bir numara giriniz.</p>
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Notunuz (Opsiyonel)</label>
-                                <textarea id="noteInp" placeholder="Belirtmek istediğiniz bir durum var mı?" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none h-24 resize-none transition-all font-medium">${state.formData.note}</textarea>
+                                <textarea id="noteInp" placeholder="Belirtmek istediğiniz bir durum var mı?" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none h-24 resize-none transition-all font-medium text-slate-800">${state.formData.note}</textarea>
                             </div>
                             <label class="flex items-start gap-3 cursor-pointer p-2 group">
                                 <input id="kvkkCheck" type="checkbox" ${state.formData.kvkk ? 'checked' : ''} class="mt-1 w-5 h-5 accent-indigo-600">
-                                <span class="text-[11px] text-slate-500 font-medium leading-tight group-hover:text-slate-700">Verilerimin işlenmesini ve benimle iletişime geçilmesini kabul ediyorum.</span>
+                                <span class="text-[11px] text-slate-500 font-medium leading-tight">
+                                    <span onclick="openModal()" class="text-indigo-600 font-bold underline cursor-pointer hover:text-indigo-800 transition-colors">KVKK aydınlatma metnini</span> okudum ve verilerimin işlenmesini kabul ediyorum.
+                                </span>
                             </label>
                             <button id="submitBtn" disabled onclick="finalSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-indigo-100 btn-active disabled:opacity-30">Analizi Gönder</button>
                         </div>
@@ -287,7 +335,6 @@
                 return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
             }).join('\n');
 
-            // 1. Arka Planda Gizli AI Analizi (Bitene kadar bekler)
             let aiAnalysis = "";
             try {
                 const aiPrompt = `Sen bir çocuk gelişim uzmanısın. Aşağıdaki tarama testi yanıtlarını analiz et ve sadece uzman için rapor hazırla. EVET yanıtları gelişimsel risk işaretidir. Yanıtlar: ${answersText}`;
@@ -300,7 +347,6 @@
                 aiAnalysis = result.candidates?.[0]?.content?.parts?.[0]?.text || "Analiz oluşturulamadı.";
             } catch (e) { aiAnalysis = "AI Hatası."; }
 
-            // 2. Formspree Gönderimi
             try {
                 await fetch(formspreeEndpoint, {
                     method: 'POST',
