@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gelişim Tarama Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            background-color: #F8FAFC;
+            margin: 0;
+        }
+        .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-active:active { transform: scale(0.96); }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        input, textarea { font-size: 16px !important; }
+    </style>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <script>
+        // --- YAPILANDIRMA ---
+        const apiKey = ""; 
+        const formspreeEndpoint = "https://formspree.io/f/mpqoblva";
+
+        const DATA = {
+            preschool: [
+                { title: "Sosyal Etkileşim", questions: [
+                    { id: "pre_1", text: "İsmiyle seslenildiğinde duyma sorunu olmadığı halde dönüp bakıyor mu?" },
+                    { id: "pre_2", text: "İlgisini çeken bir nesneyi parmağıyla gösterip sizin de bakmanızı bekliyor mu?" },
+                    { id: "pre_3", text: "Diğer çocukların oyunlarına dahil olmaya veya onları izlemeye ilgi gösteriyor mu?" },
+                    { id: "pre_4", text: "Sizinle veya başkalarıyla düzenli ve anlamlı göz teması kuruyor mu?" },
+                    { id: "pre_5", text: "Karşılıklı 'ce-ee' gibi oyunlara katılım sağlıyor mu?" },
+                    { id: "pre_6", text: "Bir oyuncağı veya nesneyi sadece göstermek için size getiriyor mu?" }
+                ]},
+                { title: "Dil ve Kavram", questions: [
+                    { id: "pre_7", text: "İhtiyaçlarını kelimelerle anlatmak yerine elinizden tutup nesneye mi götürüyor?" },
+                    { id: "pre_8", text: "Hayali oyunlar (bebek besleme, telefonla konuşma gibi) oynuyor mu?" },
+                    { id: "pre_9", text: "Kelimeleri bağlam dışı veya televizyondan duyduğu gibi mi tekrarlıyor?" },
+                    { id: "pre_10", text: "Basit yönergeleri (örn: 'Ayakkabını getir') tek seferde anlıyor mu?" },
+                    { id: "pre_11", text: "Yaşına uygun kelime hazinesine sahip olduğunu düşünüyor musunuz?" },
+                    { id: "pre_12", text: "Kendini ifade edemediğinde yoğun hırçınlık gösteriyor mu?" }
+                ]},
+                { title: "Duyusal ve Motor", questions: [
+                    { id: "pre_13", text: "Yüksek sesli aletlerden (süpürge vb.) aşırı derecede korkup kulağını kapatıyor mu?" },
+                    { id: "pre_14", text: "Parmak ucunda yürüme veya kendi etrafında dönme gibi rutinleri var mı?" },
+                    { id: "pre_15", text: "Nesneleri tuhaf açılarla veya çok yakından inceleme eğilimi var mı?" },
+                    { id: "pre_16", text: "Beslenme konusunda aşırı seçici (sadece püre veya belirli renk) mi?" },
+                    { id: "pre_17", text: "Merdiven inip çıkma gibi kaba motor becerilerde yaşıtlarından geride mi?" },
+                    { id: "pre_18", text: "El çırpma veya sallanma gibi tekrarlayıcı vücut hareketleri yapıyor mu?" }
+                ]}
+            ],
+            primary: [
+                { title: "Okuma ve Dil", questions: [
+                    { id: "pri_1", text: "Okurken sık sık satır atlıyor veya kelime sonlarını uyduruyor mu?" },
+                    { id: "pri_2", text: "Harf-ses eşleştirmesinde (örn: 'S' harfi hangi ses?) zorluk yaşıyor mu?" },
+                    { id: "pri_3", text: "Okuma hızı sınıf ortalamasının belirgin şekilde altında mı?" },
+                    { id: "pri_4", text: "Benzer görsel yapıdaki harfleri (b-d, p-q, m-n) karıştırıyor mu?" },
+                    { id: "pri_5", text: "Okuduğu bir metni kendi cümleleriyle özetlemekte zorlanıyor mu?" },
+                    { id: "pri_6", text: "Kafiyeli kelimeleri bulmakta veya sesleri birleştirmekte güçlük çekiyor mu?" }
+                ]},
+                { title: "Matematik ve Mantık", questions: [
+                    { id: "pri_7", text: "Toplama/çıkarma yaparken hala parmak saymaya devam ediyor mu?" },
+                    { id: "pri_8", text: "Matematiksel sembolleri (+, -, x, >) birbirine karıştırıyor mu?" },
+                    { id: "pri_9", text: "Sayıların basamak değerini (onluk-birlik) kavramakta zorlanıyor mu?" },
+                    { id: "pri_10", text: "Ritmik saymalarda (örn: üçer üçer) sık sık hata yapıyor mu?" },
+                    { id: "pri_11", text: "Problem sorularında hangi işlemi yapacağını seçmekte zorlanıyor mu?" },
+                    { id: "pri_12", text: "Analog saat okumayı veya zaman kavramını öğrenmekte dirençli mi?" }
+                ]},
+                { title: "Yazma ve Düzen", questions: [
+                    { id: "pri_13", text: "Yazıları satır dışına taşıyor, aşırı eğri veya okunaksız mı?" },
+                    { id: "pri_14", text: "Bazı sayı veya harfleri ayna hayali (ters) yazıyor mu?" },
+                    { id: "pri_15", text: "Ayakkabı bağlama, düğme ilikleme gibi işlerde çok mu yavaş?" },
+                    { id: "pri_16", text: "Ödevlerini organize etmekte ve çantasını hazırlamakta sürekli desteğe muhtaç mı?" },
+                    { id: "pri_17", text: "Sağ ve sol tarafını ayırt etmekte sıklıkla karıştırıyor mu?" },
+                    { id: "pri_18", text: "Eşyalarını (silgi, kalem vb.) korumakta ve okulda unutmamakta sorun yaşıyor mu?" }
+                ]}
+            ]
+        };
+
+        let state = {
+            view: 'landing',
+            ageGroup: null,
+            currentSection: 0,
+            answers: {},
+            formData: { name: '', phone: '', note: '', kvkk: false },
+            isSubmitting: false
+        };
+
+        function render() {
+            const app = document.getElementById('app');
+            if (state.view === 'landing') renderLanding(app);
+            else if (state.view === 'quiz') renderQuiz(app);
+            else if (state.view === 'contact') renderContact(app);
+            else if (state.view === 'success') renderSuccess(app);
+        }
+
+        function renderLanding(app) {
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center p-6 fade-in">
+                    <div class="max-w-3xl w-full text-center space-y-12">
+                        <div class="space-y-4">
+                            <span class="text-indigo-600 font-bold text-sm tracking-widest uppercase">Özel Eğitim & Gelişim Takibi</span>
+                            <h1 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight">Çocuğunuzun Gelişimini <br/>Birlikte İzleyelim</h1>
+                            <p class="text-slate-500 text-lg max-w-xl mx-auto font-medium">Uzmanlarımız tarafından hazırlanan tarama testi ile ilk adımı atın.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+                            <button onclick="startQuiz('preschool')" class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 hover:border-indigo-400 text-left transition-all btn-active group">
+                                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A5 5 0 0 1 12 10a5 5 0 0 1 2.5-8"/><path d="M12 10v10"/><path d="M16 7a5 5 0 0 1 3 9 5 5 0 0 1-7 1"/><path d="M8 7a5 5 0 0 0-3 9 5 5 0 0 0 7 1"/></svg>
+                                </div>
+                                <h3 class="text-2xl font-black text-slate-800">Okul Öncesi</h3>
+                                <p class="text-slate-500 text-sm mt-2 font-medium">Sosyal etkileşim ve temel gelişim taraması.</p>
+                            </button>
+                            <button onclick="startQuiz('primary')" class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 hover:border-indigo-400 text-left transition-all btn-active group">
+                                <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                                </div>
+                                <h3 class="text-2xl font-black text-slate-800">İlkokul Grubu</h3>
+                                <p class="text-slate-500 text-sm mt-2 font-medium">Öğrenme güçlüğü ve akademik uyum analizi.</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderQuiz(app) {
+            const sections = DATA[state.ageGroup];
+            const sec = sections[state.currentSection];
+            const total = sections.reduce((acc, s) => acc + s.questions.length, 0);
+            const answered = Object.keys(state.answers).length;
+            const progress = (answered / total) * 100;
+            const allAnswered = sec.questions.every(q => state.answers[q.id] !== undefined);
+            
+            app.innerHTML = `
+                <div class="min-h-screen p-4 md:p-8 flex flex-col items-center fade-in">
+                    <div class="max-w-2xl w-full bg-white/90 backdrop-blur p-4 md:p-6 rounded-2xl shadow-md border border-slate-100 sticky top-4 z-20 mb-8">
+                        <div class="flex justify-between items-end mb-3">
+                            <div>
+                                <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">BÖLÜM ${state.currentSection + 1} / ${sections.length}</p>
+                                <h2 class="text-xl font-bold text-slate-800">${sec.title}</h2>
+                            </div>
+                            <span class="text-sm font-bold text-slate-400">%${Math.round(progress)}</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div class="progress-bar bg-indigo-600 h-full rounded-full" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                    <div class="max-w-2xl w-full space-y-6 pb-32">
+                        ${sec.questions.map(q => `
+                            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                                <p class="text-lg font-bold text-slate-800 mb-8 leading-snug">${q.text}</p>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <button onclick="setAnswer('${q.id}', true)" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
+                                    <button onclick="setAnswer('${q.id}', false)" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                    <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
+                        <button id="nextBtn" ${!allAnswered ? 'disabled' : ''} onclick="nextStep()" class="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-bold text-lg shadow-2xl transition-all btn-active disabled:opacity-20">
+                            ${state.currentSection === sections.length - 1 ? 'Başvuruyu Tamamla' : 'Sonraki Bölüme Geç'}
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function renderContact(app) {
+            app.innerHTML = `
+                <div class="min-h-screen p-4 flex items-center justify-center fade-in">
+                    <div class="max-w-xl w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
+                        <div class="bg-indigo-600 p-10 text-white">
+                            <h2 class="text-3xl font-black mb-2">Son Bir Adım</h2>
+                            <p class="opacity-90 font-medium text-sm">Yanıtlarınız hazırlandı. Uzmanımızdan geri dönüş almak için bilgilerinizi iletin.</p>
+                        </div>
+                        <div class="p-10 space-y-5">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Ad Soyad</label>
+                                <input id="nameInp" placeholder="Ahmet Yılmaz" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all" value="${state.formData.name}">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Telefon (05xx...)</label>
+                                <input id="phoneInp" type="tel" maxlength="11" placeholder="05xx xxx xx xx" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none transition-all" value="${state.formData.phone}">
+                                <p id="phoneError" class="text-red-500 text-[10px] font-bold mt-1 ml-2 hidden">Geçerli bir 05xx numarası giriniz.</p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 ml-2 uppercase tracking-wider">Not (Opsiyonel)</label>
+                                <textarea id="noteInp" placeholder="Belirtmek istediğiniz bir durum var mı?" class="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none h-24 resize-none transition-all">${state.formData.note}</textarea>
+                            </div>
+                            <label class="flex items-start gap-3 cursor-pointer p-2">
+                                <input id="kvkkCheck" type="checkbox" ${state.formData.kvkk ? 'checked' : ''} class="mt-1 w-5 h-5 accent-indigo-600">
+                                <span class="text-[11px] text-slate-500 font-medium leading-tight">KVKK aydınlatma metnini okudum ve verilerimin işlenmesini kabul ediyorum.</span>
+                            </label>
+                            <button id="submitBtn" disabled onclick="finalSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-indigo-100 btn-active disabled:opacity-30">Analizi Uzmana Gönder</button>
+                        </div>
+                    </div>
+                </div>`;
+
+            const nInp = document.getElementById('nameInp');
+            const pInp = document.getElementById('phoneInp');
+            const noteInp = document.getElementById('noteInp');
+            const kCheck = document.getElementById('kvkkCheck');
+            const sBtn = document.getElementById('submitBtn');
+            const pErr = document.getElementById('phoneError');
+
+            const validate = () => {
+                const phone = state.formData.phone;
+                const phoneValid = /^05\d{9}$/.test(phone);
+                const isFormValid = state.formData.name.trim().length > 1 && phoneValid && state.formData.kvkk;
+                sBtn.disabled = !isFormValid;
+                sBtn.innerText = state.isSubmitting ? 'Gönderiliyor...' : 'Analizi Uzmana Gönder';
+
+                let err = (phone.length > 0 && phone[0] !== '0') || (phone.length >= 2 && !phone.startsWith('05')) || (phone.length === 11 && !phoneValid);
+                if (err) { pErr.classList.remove('hidden'); pInp.classList.add('border-red-300'); }
+                else { pErr.classList.add('hidden'); pInp.classList.remove('border-red-300'); }
+            };
+
+            nInp.oninput = (e) => { state.formData.name = e.target.value; validate(); };
+            pInp.oninput = (e) => { state.formData.phone = e.target.value.replace(/\D/g, ''); validate(); };
+            noteInp.oninput = (e) => { state.formData.note = e.target.value; };
+            kCheck.onchange = (e) => { state.formData.kvkk = e.target.checked; validate(); };
+            validate();
+        }
+
+        function renderSuccess(app) {
+            app.innerHTML = `
+                <div class="min-h-screen p-6 flex items-center justify-center text-center fade-in">
+                    <div class="max-w-md w-full bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-100 space-y-8">
+                        <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </div>
+                        <div class="space-y-4">
+                            <h2 class="text-3xl font-black text-slate-900">Başvurunuz Alındı</h2>
+                            <p class="text-slate-600 font-medium leading-relaxed">Yanıtlarınız uzman ekibimize iletildi. En kısa sürede sizinle iletişime geçecektir.</p>
+                        </div>
+                        <button onclick="location.reload()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold btn-active">Başa Dön</button>
+                    </div>
+                </div>`;
+        }
+
+        // --- MANTIKSAL FONKSİYONLAR ---
+        function startQuiz(group) { 
+            state.ageGroup = group; 
+            state.view = 'quiz'; 
+            render(); 
+            window.scrollTo(0, 0); 
+        }
+
+        function setAnswer(id, val) { 
+            state.answers[id] = val; 
+            render(); 
+        }
+
+        function nextStep() {
+            const sections = DATA[state.ageGroup];
+            if (state.currentSection < sections.length - 1) { 
+                state.currentSection++; 
+                render(); 
+                window.scrollTo(0, 0); 
+            }
+            else { 
+                state.view = 'contact'; 
+                render(); 
+                window.scrollTo(0, 0); 
+            }
+        }
+
+        async function finalSubmit() {
+            if (state.isSubmitting) return;
+            state.isSubmitting = true;
+            const btn = document.getElementById('submitBtn');
+            if (btn) { btn.disabled = true; btn.innerText = "Gönderiliyor..."; }
+
+            const answersText = Object.entries(state.answers).map(([id, val]) => {
+                const q = [...DATA.preschool, ...DATA.primary].flatMap(s => s.questions).find(q => q.id === id);
+                return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
+            }).join('\n');
+
+            // --- GİZLİ AI ANALİZİ ---
+            let aiReport = "AI Analizi hazırlanıyor...";
+            try {
+                const aiPrompt = `Sen bir uzman çocuk gelişimcisin. Bu tarama testindeki EVET yanıtlarını analiz ederek profesyonel bir rapor oluştur. Grup: ${state.ageGroup} Yanıtlar: ${answersText}`;
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: aiPrompt }] }] })
+                });
+                const result = await response.json();
+                aiReport = result.candidates?.[0]?.content?.parts?.[0]?.text || aiReport;
+            } catch (e) { console.error("AI error"); }
+
+            // --- FORMSPREE GÖNDERİM ---
+            try {
+                await fetch(formspreeEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ 
+                        subject: `Tarama Başvurusu: ${state.formData.name}`,
+                        ad_soyad: state.formData.name,
+                        tel: state.formData.phone,
+                        mesaj: state.formData.note,
+                        grup: state.ageGroup,
+                        UZMAN_ANALIZI: aiReport,
+                        ham_veriler: answersText 
+                    })
+                });
+                state.view = 'success';
+                window.scrollTo(0, 0); 
+            } catch (err) { 
+                state.view = 'success'; 
+                window.scrollTo(0, 0);
+            }
+            finally { state.isSubmitting = false; render(); }
+        }
+
+        render();
+    </script>
+</body>
+</html>
