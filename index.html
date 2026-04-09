@@ -148,8 +148,8 @@
                             <div id="q-${q.id}" class="card question-card p-8 ${state.answers[q.id] !== undefined ? 'bg-indigo-50/20' : ''}">
                                 <p class="text-lg font-bold text-slate-800 mb-6 leading-snug">${q.text}</p>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
-                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
+                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
+                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -237,7 +237,8 @@
             const questions = DATA[state.ageGroup];
             if (idx < questions.length - 1) {
                 setTimeout(() => {
-                    const el = document.getElementById(`q-${questions[idx + 1].id}`);
+                    const nextQId = questions[idx + 1].id;
+                    const el = document.getElementById(`q-${nextQId}`);
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 50);
             }
@@ -255,21 +256,48 @@
             btn.disabled = !valid;
         }
 
+        // Rate Limit (429) hatalarını yöneten tekrar deneme fonksiyonu
+        async function fetchWithRetry(url, options, retries = 3, delay = 2000) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status === 429 && retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                }
+                return response;
+            } catch (e) {
+                if (retries > 0) {
+                    await new Promise(res => setTimeout(res, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                }
+                throw e;
+            }
+        }
+
         async function submitData() {
             document.getElementById('finalSubmitBtn').innerText = "Gönderiliyor...";
+            document.getElementById('finalSubmitBtn').disabled = true;
+
             const results = Object.entries(state.answers).map(([id, val]) => {
                 const q = Object.values(DATA).flat().find(q => q.id === id);
                 return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
             }).join('\n');
 
+            const payload = { ...state.formData, ageGroup: state.ageGroup, testResults: results };
+
             try {
-                await fetch(makeWebhookUrl, { 
+                // İstek limitine takılsa bile arka planda denemeye devam et, kullanıcıyı bekletme
+                fetchWithRetry(makeWebhookUrl, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ ...state.formData, ageGroup: state.ageGroup, testResults: results }) 
+                    body: JSON.stringify(payload) 
                 });
+                
+                // Kullanıcıyı hemen başarı ekranına gönder (Webhook ulaşmasa bile kullanıcı deneyimi kırılmasın)
                 changeView('success');
-            } catch (e) { changeView('success'); }
+            } catch (e) { 
+                changeView('success'); 
+            }
         }
 
         function closeModal() { document.getElementById('kvkkModal').style.display = 'none'; }
