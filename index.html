@@ -44,16 +44,17 @@
 
     <div id="app"></div>
 
+    <!-- KVKK Modal -->
     <div id="kvkkModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4" onclick="closeModal()">
         <div class="bg-white w-full max-w-2xl max-h-[80vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col fade-in" onclick="event.stopPropagation()">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="text-xl font-black text-slate-800 tracking-tight">KVKK Aydınlatma Metni</h3>
                 <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold hover:bg-slate-300 transition-colors">&times;</button>
             </div>
-            <div class="p-8 overflow-y-auto text-slate-600 text-sm leading-relaxed space-y-4">
+            <div class="p-8 overflow-y-auto text-slate-600 text-sm leading-relaxed space-y-4 text-xs md:text-sm">
                 <p><strong>Özel Dokunuş Eğitim Danışmanlık</strong> veri sorumlusu sıfatıyla;</p>
                 <p>Gelişim tarama testi kapsamında topladığımız bilgiler; sadece ön değerlendirme raporunun hazırlanması ve size geri dönüş sağlanması amacıyla işlenmektedir. Verileriniz üçüncü şahıslarla paylaşılmaz.</p>
-                <p class="pt-4 text-xs italic">Formu onaylayarak verilerinizin uzman değerlendirmesi amacıyla işlenmesine rıza göstermiş sayılırsınız.</p>
+                <p class="pt-4 text-[10px] md:text-xs italic">Formu onaylayarak verilerinizin uzman değerlendirmesi amacıyla işlenmesine rıza göstermiş sayılırsınız.</p>
             </div>
             <div class="p-6 border-t border-slate-100 bg-slate-50 text-center">
                 <button onclick="closeModal()" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold btn-active">Kapat</button>
@@ -63,34 +64,33 @@
 
     <script>
         const makeWebhookUrl = "https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz";
-        const formspreeUrl = "https://formspree.io/f/ozeldokunus@gmail.com"; 
 
         const DATA = {
             infant: [
                 { id: "inf_1", text: "Göz teması kuruyor, sizinle duygusal etkileşime giriyor ve yüzünüze odaklanıyor mu?" },
-                { id: "inf_2", text: "Seslere tepki veriyor, ismiyle seslenildiğinde dönüp bakıyor mu?" },
-                { id: "inf_3", text: "İlgisini çeken bir nesneyi parmağıyla gösterip sizin de bakmanızı bekliyor mu?" },
-                { id: "inf_4", text: "Sosyal gülümseme veya taklit var mı?" },
+                { id: "inf_2", text: "Seslere tepki veriyor, ismiyle seslenildiğinde (başka bir işle meşgul değilse) dönüp bakıyor mu?" },
+                { id: "inf_3", text: "İlgisini çeken bir nesneyi parmağıyla gösterip sizin de bakmanızı bekliyor mu (Ortak Dikkat)?" },
+                { id: "inf_4", text: "Sosyal gülümseme (karşılık olarak gülme) veya mimikleri taklit etme var mı?" },
                 { id: "inf_5", text: "Yaşına uygun heceleme, cıvıldama veya basit kelime denemeleri yapıyor mu?" }
             ],
             preschool: [
-                { id: "pre_1", text: "İsmiyle seslenildiğinde dönüp bakıyor veya karşılık veriyor mu?" },
-                { id: "pre_2", text: "İlgisini çeken bir nesneyi parmağıyla göstererek sizinle paylaşıyor mu?" },
+                { id: "pre_1", text: "İsmiyle seslenildiğinde duyma sorunu olmadığı halde dönüp bakıyor veya karşılık veriyor mu?" },
+                { id: "pre_2", text: "İlgisini çeken bir nesneyi parmağıyla göstererek sizinle bu ilgiyi paylaşıyor mu?" },
                 { id: "pre_3", text: "Diğer çocukların oyunlarına dahil olmaya çalışıyor mu?" },
-                { id: "pre_4", text: "Düzenli, anlamlı ve derinlemesine göz teması kuruyor mu?" },
-                { id: "pre_5", text: "Hayali oyunlar oynuyor mu?" }
+                { id: "pre_4", text: "Sizinle veya başkalarıyla düzenli, anlamlı ve derinlemesine göz teması kuruyor mu?" },
+                { id: "pre_5", text: "Hayali oyunlar (bebek besleme, telefonla konuşma gibi) oynuyor mu?" }
             ],
             primary: [
-                { id: "pri_1", text: "Okurken satır atlama veya harf karıştırma var mı?" },
-                { id: "pri_2", text: "Okuma hızı sınıf ortalamasının altında mı?" },
-                { id: "pri_3", text: "Matematiksel sembolleri karıştırıyor veya parmak sayıyor mu?" },
-                { id: "pri_4", text: "Yazı yazarken harf eksik bırakıyor mu?" },
-                { id: "pri_5", text: "Sağ-sol ayrımı yapmakta veya zaman kavramlarını karıştırıyor mu?" },
-                { id: "pri_6", text: "Arkadaş edinmekte veya oyun kurallarında zorluk yaşıyor mu?" },
-                { id: "pri_7", text: "Şakaları veya yüz ifadelerindeki duygusal mesajları anlamakta güçlük çekiyor mu?" },
+                { id: "pri_1", text: "Okurken sık sık satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, m-n) karıştırıyor mu?" },
+                { id: "pri_2", text: "Okuma hızı sınıf ortalamasının belirgin şekilde altında mı ve okuduğunu özetlemekte zorlanıyor mu?" },
+                { id: "pri_3", text: "Matematiksel sembolleri karıştırıyor, basit toplama/çıkarma yaparken hala parmak sayıyor mu?" },
+                { id: "pri_4", text: "Yazı yazarken harf/hece eksik bırakıyor mu veya defter düzeni kurmakta zorlanıyor mu?" },
+                { id: "pri_5", text: "Analog saat okumayı öğrenmekte veya sağ-sol ayrımı yapmakta çok zorlanıyor mu?" },
+                { id: "pri_6", text: "Arkadaş edinmekte, oyunun kurallarına uymakta zorluk yaşıyor mu?" },
+                { id: "pri_7", text: "Şakaları, mecazları veya yüz ifadelerindeki duygusal mesajları anlamakta güçlük çekiyor mu?" },
                 { id: "pri_8", text: "Sohbeti sürdürürken hep kendi ilgisini çeken konulardan bahsediyor mu?" },
-                { id: "pri_9", text: "Beklenmedik plan değişikliklerine karşı aşırı tepki veriyor mu?" },
-                { id: "pri_10", text: "Yaşına uygun özbakım becerilerinde (çanta hazırlama vb.) desteğe ihtiyaç duyuyor mu?" }
+                { id: "pri_9", text: "Beklenmedik plan değişikliklerine karşı aşırı tepki veya direnç gösteriyor mu?" },
+                { id: "pri_10", text: "Yaşına uygun özbakım ve organizasyon becerilerinde sürekli desteğe ihtiyaç duyuyor mu?" }
             ]
         };
 
@@ -121,9 +121,9 @@
                 <div class="min-h-screen flex items-center justify-center p-6 fade-in text-center">
                     <div class="max-w-4xl w-full space-y-12">
                         <div class="space-y-4">
-                            <span class="text-indigo-600 font-bold text-sm tracking-widest uppercase font-black">Özel Dokunuş Eğitim Danışmanlık</span>
+                            <span class="text-indigo-600 font-extrabold text-sm tracking-widest uppercase">Özel Dokunuş Eğitim Danışmanlık</span>
                             <h1 class="text-4xl md:text-6xl font-black text-slate-900 leading-tight">Gelişim Analiz <br/><span class="text-indigo-600">Sistemi</span></h1>
-                            <p class="text-slate-500 text-lg max-w-xl mx-auto font-medium">Lütfen çocuğunuzun yaş grubunu seçerek devam edin.</p>
+                            <p class="text-slate-500 text-lg max-w-xl mx-auto font-medium">Lütfen çocuğunuzun yaş grubunu seçerek taramayı başlatın.</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <button onclick="changeView('quiz', 'infant')" class="card p-8 hover:border-indigo-400 btn-active text-left group">
@@ -157,7 +157,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                                 <span class="text-[10px] font-black uppercase tracking-wider">Vazgeç</span>
                             </button>
-                            <p class="text-xs font-black text-indigo-600 uppercase mx-auto">Tarama Soruları</p>
+                            <p class="text-xs font-black text-indigo-600 uppercase tracking-tighter mx-auto">Tarama Soruları</p>
                             <span class="text-xs font-bold text-slate-400 w-[40px] text-right">${answeredCount}/${qs.length}</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -166,16 +166,16 @@
                     </div>
                     <div class="max-w-2xl w-full space-y-6 pb-40">
                         ${qs.map((q, idx) => `
-                            <div id="q-${q.id}" class="card question-card p-8 ${state.answers[q.id] !== undefined ? 'bg-indigo-50/20' : ''}">
+                            <div id="q-${q.id}" class="card question-card p-8 ${state.answers[q.id] !== undefined ? 'bg-indigo-50/10' : ''}">
                                 <p class="text-lg font-bold text-slate-800 mb-6 leading-snug">${q.text}</p>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
-                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
+                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
+                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
                                 </div>
                             </div>`).join('')}
                     </div>
                     <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
-                        <button id="nextBtn" ${!allAnswered ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 btn-active">Profil Bilgilerine Geç</button>
+                        <button id="nextBtn" ${!allAnswered ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 transition-all btn-active">Profil Bilgilerine Geç</button>
                     </div>
                 </div>`;
         }
@@ -197,7 +197,7 @@
                             <h2 class="text-2xl font-black text-center">Genel Profil & Öykü</h2>
                         </div>
 
-                        <div class="card p-8 space-y-5">
+                        <div id="section-general" class="card p-8 space-y-5">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Cinsiyet</label>
@@ -260,17 +260,17 @@
                                         <input type="checkbox" ${state.formData.likes.includes(item) ? 'checked' : ''} onchange="toggleLike('${item}')" class="hidden"> ${item}
                                     </label>`).join('')}
                             </div>
-                            ${state.formData.likes.includes('Diğer') ? `<input type="text" placeholder="Lütfen belirtiniz" value="${state.formData.otherLikeDetail}" oninput="updateForm('otherLikeDetail', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500 font-medium">` : ''}
+                            ${state.formData.likes.includes('Diğer') ? `<input type="text" placeholder="Lütfen belirtiniz (Opsiyonel)" value="${state.formData.otherLikeDetail}" oninput="updateForm('otherLikeDetail', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500 font-medium">` : ''}
                             
                             <input type="text" placeholder="Sizce en büyük gelişimsel problem nedir?" value="${state.formData.biggestProblem}" oninput="updateForm('biggestProblem', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">
                             <input type="text" placeholder="Öncelikli hedefiniz ne?" value="${state.formData.primaryGoal}" oninput="updateForm('primaryGoal', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">
                             
-                            <div class="pt-4 space-y-3 border-t">
+                            <div id="section-contact" class="pt-4 space-y-3 border-t">
                                 <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Ad Soyad</label><input id="field-name" type="text" placeholder="Veli Ad Soyad" value="${state.formData.name}" oninput="updateForm('name', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold text-slate-800 border-2 border-transparent focus:border-indigo-500"></div>
                                 <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Telefon</label><input id="field-phone" type="tel" maxlength="11" placeholder="05xx xxx xx xx" value="${state.formData.phone}" oninput="updateForm('phone', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold text-slate-800 border-2 border-transparent focus:border-indigo-500"></div>
-                                <label id="container-kvkk" class="flex items-start gap-3 p-2 cursor-pointer border-2 border-transparent">
+                                <label id="container-kvkk" class="flex items-start gap-3 p-2 cursor-pointer border-2 border-transparent rounded-xl transition-all">
                                     <input id="field-kvkk" type="checkbox" ${state.formData.kvkk ? 'checked' : ''} onchange="updateForm('kvkk', this.checked); render();" class="mt-1 w-5 h-5 accent-indigo-600">
-                                    <span class="text-[11px] text-slate-500 font-medium">KVKK metnini okudum ve kabul ediyorum.</span>
+                                    <span class="text-[11px] text-slate-500 font-medium">KVKK aydınlatma metnini okudum ve kabul ediyorum.</span>
                                 </label>
                             </div>
                             <button id="finalSubmitBtn" onclick="handleFinalSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl btn-active transition-all">Analizi Tamamla ve Gönder</button>
@@ -283,13 +283,13 @@
         function renderSuccess(app) {
             app.innerHTML = `
                 <div class="min-h-screen flex items-center justify-center p-6 text-center fade-in">
-                    <div class="max-w-md w-full card p-12 space-y-8">
-                        <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
+                    <div class="max-w-md w-full card p-12 space-y-8 shadow-2xl">
+                        <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce shadow-inner">
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                         </div>
                         <h2 class="text-3xl font-black text-slate-900 leading-tight">Başvurunuz Alındı!</h2>
-                        <p class="text-slate-600 text-sm font-medium italic">Sistemimiz sizi ana sayfaya yönlendiriyor...</p>
-                        <button onclick="safeRedirect('https://ozeldokunus.com')" class="text-indigo-600 underline font-bold">Yönlendirme olmazsa tıklayın</button>
+                        <p class="text-slate-600 text-sm font-medium italic">Uzmanımız verilerinizi analiz ederek en kısa sürede sizinle iletişime geçecektir. Sistemimiz sizi ana sayfaya yönlendiriyor...</p>
+                        <button onclick="safeRedirect('https://ozeldokunus.com')" class="text-indigo-600 underline font-bold text-xs uppercase tracking-widest">Yönlendirme olmazsa tıklayın</button>
                     </div>
                 </div>`;
             setTimeout(() => { safeRedirect('https://ozeldokunus.com'); }, 5000);
@@ -300,7 +300,6 @@
         function safeRedirect(url) { window.open(url, '_top'); }
         function changeView(view, group = null) { state.view = view; if (group) state.ageGroup = group; render(); window.scrollTo(0, 0); }
         
-        // GÜNCELLENEN FONKSİYON: OTOMATİK KAYDIRMA EKLENDİ
         function handleAnswer(id, val, idx) { 
             state.answers[id] = val; 
             render(); 
@@ -316,7 +315,7 @@
 
         function updateForm(key, val) { 
             state.formData[key] = (key === 'phone') ? val.replace(/\D/g, '') : val; 
-            if (key === 'diagnosis' || key === 'specificDiagnosis') render();
+            if (key === 'diagnosis' || key === 'specificDiagnosis' || key === 'likes') render();
             updateButtonStyle(); 
         }
 
@@ -384,22 +383,19 @@
                 return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
             }).join('\n');
 
-            const payload = { ...state.formData, ageGroup: state.ageGroup, testResults: results, submittedAt: new Date().toLocaleString('tr-TR') };
-
-            const formPromise = fetch(formspreeUrl, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
-                body: JSON.stringify(payload) 
-            });
-
-            fetchWithRetry(makeWebhookUrl, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(payload) 
-            }).catch(e => console.log("AI Limit Hatası."));
+            const payload = { 
+                ...state.formData, 
+                ageGroup: state.ageGroup, 
+                testResults: results, 
+                submittedAt: new Date().toLocaleString('tr-TR') 
+            };
 
             try {
-                await formPromise;
+                await fetchWithRetry(makeWebhookUrl, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                });
                 changeView('success');
             } catch (e) {
                 changeView('success');
