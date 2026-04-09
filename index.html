@@ -81,7 +81,7 @@
                 { id: "pre_5", text: "Hayali oyunlar (bebek besleme, telefonla konuşma gibi) oynuyor mu?" }
             ],
             primary: [
-                { id: "pri_1", text: "Okurken sık sık satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, m-n) karıştırıyor mu?" },
+                { id: "pri_1", text: "Okurken sık sık satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, p-q, m-n) karıştırıyor mu?" },
                 { id: "pri_2", text: "Okuma hızı sınıf ortalamasının belirgin şekilde altında mı ve okuduğunu özetlemekte zorlanıyor mu?" },
                 { id: "pri_3", text: "Matematiksel sembolleri karıştırıyor, basit toplama/çıkarma yaparken hala parmak sayıyor mu?" },
                 { id: "pri_4", text: "Yazı yazarken harf/hece eksik bırakıyor mu veya defter düzeni kurmakta zorlanıyor mu?" },
@@ -103,7 +103,8 @@
                 gender: '', exactAge: '', diagnosis: '', meds: '',
                 specificDiagnosis: '', otherDiagnosisDetail: '',
                 routine: '', sensitivity: '', biggestProblem: '', primaryGoal: '',
-                likes: [], otherLikeDetail: ''
+                likes: [], otherLikeDetail: '',
+                birthInfo: '' // Düzeltme: birthInfo başlangıç değeri eklendi
             },
             isSubmitting: false
         };
@@ -244,9 +245,13 @@
                             <div><label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kullanılan İlaçlar</label><input type="text" placeholder="Varsa belirtin" value="${state.formData.meds}" oninput="updateForm('meds', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500"></div>
                         </div>
 
-                        ${state.ageGroup === 'infant' ? `<div class="card p-8"><label class="text-[10px] font-black text-indigo-600 uppercase">Doğum Öncesi & Doğum Anı</label><textarea oninput="updateForm('birthInfo', this.value)" placeholder="Gebelikte risk, zor doğum, kuvöz vb." class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-2 h-24 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.birthInfo}</textarea></div>` : ''}
+                        ${state.ageGroup === 'infant' ? `
+                        <div class="card p-8">
+                            <label class="text-[10px] font-black text-indigo-600 uppercase">Doğum Öncesi & Doğum Anı</label>
+                            <textarea oninput="updateForm('birthInfo', this.value)" placeholder="Gebelikte risk, zor doğum, kuvöz vb." class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-2 h-24 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.birthInfo}</textarea>
+                        </div>` : ''}
 
-                        <div class="card p-8 space-y-4">
+                        <div class="card p-8 space-y-4 text-slate-800">
                             <h4 class="text-xs font-black text-indigo-600 uppercase border-b pb-2">Davranış & Duyusal</h4>
                             <textarea oninput="updateForm('routine', this.value)" placeholder="Günlük rutinler, yönerge takibi ve öfke..." class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-1 h-20 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.routine}</textarea>
                             <textarea oninput="updateForm('sensitivity', this.value)" placeholder="Duyusal hassasiyetler..." class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-1 h-20 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.sensitivity}</textarea>
