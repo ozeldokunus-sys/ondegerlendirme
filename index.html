@@ -17,12 +17,27 @@
         .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .btn-active:active { transform: scale(0.96); }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .shake { animation: shake 0.3s ease-in-out 2; }
+        
+        .field-error { 
+            border-color: #ef4444 !important; 
+            background-color: #fef2f2 !important;
+        }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
-        input, textarea, select { font-size: 16px !important; }
+        input, textarea, select { font-size: 16px !important; transition: all 0.2s ease; }
         .card { background: white; border-radius: 2rem; border: 1px solid #F1F5F9; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); transition: all 0.3s ease; }
         .question-card { scroll-margin-top: 120px; }
+        .required-label::after { content: " *"; color: #ef4444; }
     </style>
 </head>
 <body>
@@ -30,7 +45,7 @@
     <div id="app"></div>
 
     <!-- KVKK Modal -->
-    <div id="kvkkModal" class="modal-overlay fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4" onclick="closeModal()">
+    <div id="kvkkModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4" onclick="closeModal()">
         <div class="bg-white w-full max-w-2xl max-h-[80vh] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col fade-in" onclick="event.stopPropagation()">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="text-xl font-black text-slate-800 tracking-tight">KVKK Aydınlatma Metni</h3>
@@ -63,16 +78,16 @@
                 { id: "pre_2", text: "İlgisini çeken bir nesneyi parmağıyla göstererek sizinle bu ilgiyi paylaşıyor mu?" },
                 { id: "pre_3", text: "Diğer çocukların oyunlarına dahil olmaya çalışıyor mu yoksa hep tek başına mı kalıyor?" },
                 { id: "pre_4", text: "Sizinle veya başkalarıyla düzenli, anlamlı ve derinlemesine göz teması kuruyor mu?" },
-                { id: "pre_5", text: "Hayali oyunlar (bebek besleme, telefonla konuşma, araba sürme gibi) oynuyor mu?" }
+                { id: "pre_5", text: "Hayali oyunlar (bebek besleme, telefonla konuşma gibi) oynuyor mu?" }
             ],
             primary: [
                 { id: "pri_1", text: "Okurken sık sık satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, p-q, m-n) karıştırıyor mu?" },
                 { id: "pri_2", text: "Okuma hızı sınıf ortalamasının belirgin şekilde altında mı ve okuduğu kısa bir metni özetlemekte zorlanıyor mu?" },
                 { id: "pri_3", text: "Matematiksel sembolleri (+, -, x) karıştırıyor, basit toplama/çıkarma yaparken hala parmak sayıyor mu?" },
                 { id: "pri_4", text: "Yazı yazarken harf/hece eksik bırakıyor mu, yazısı okunaksız mı veya defter düzeni kurmakta zorlanıyor mu?" },
-                { id: "pri_5", text: "Analog saat okumayı öğrenmekte, sağ-sol ayrımı yapmakta veya aylar/mevsimler sırasını karıştırıyor mu?" },
-                { id: "pri_6", text: "Arkadaş edinmekte, oyun kurmakta veya oyunun kurallarına (sıra bekleme, kaybetmeyi kabullenme) uymakta zorluk yaşıyor mu?" },
-                { id: "pri_7", text: "Karşısındaki kişinin şakalarını, mecaz ifadelerini veya yüz ifadelerindeki duygusal mesajları anlamakta güçlük çekiyor mu?" },
+                { id: "pri_5", text: "Analog saat okumayı öğrenmekte veya sağ-sol ayrımı yapmakta çok zorlanıyor mu?" },
+                { id: "pri_6", text: "Arkadaş edinmekte, oyunun kurallarına uymakta zorluk yaşıyor mu?" },
+                { id: "pri_7", text: "Karşısındaki kişinin şakalarını, mecazlarını veya yüz ifadelerindeki duygusal mesajları anlamakta güçlük çekiyor mu?" },
                 { id: "pri_8", text: "Sohbeti sürdürürken hep kendi ilgisini çeken konulardan bahsediyor mu veya karşısındakini dinlemekte zorlanıyor mu?" },
                 { id: "pri_9", text: "Günlük hayatta beklenmedik plan değişikliklerine karşı aşırı tepki veriyor mu veya yeni bir ortama girmekte çok mu dirençli?" },
                 { id: "pri_10", text: "Yaşına uygun özbakım becerilerinde (üstünü değiştirme, çanta hazırlama, eşyalarını koruma) sürekli desteğe ihtiyaç duyuyor mu?" }
@@ -86,9 +101,13 @@
             formData: {
                 name: '', phone: '', note: '', kvkk: false,
                 gender: '', exactAge: '', diagnosis: '', meds: '',
+                specificDiagnosis: '', 
+                otherDiagnosisDetail: '',
                 routine: '', instructions: '', tantrums: '', sensitivity: '',
                 painThreshold: '', repetitiveMoves: '', biggestProblem: '', 
-                primaryGoal: '', homeHardship: '', birthInfo: '', likes: []
+                primaryGoal: '', homeHardship: '', birthInfo: '', 
+                likes: [],
+                otherLikeDetail: '' // Yeni Alan
             },
             isSubmitting: false
         };
@@ -142,7 +161,7 @@
                         <div class="flex items-center justify-between mb-2">
                             <button onclick="changeView('landing')" class="flex items-center gap-1 text-slate-400 hover:text-indigo-600 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                                <span class="text-[10px] font-black uppercase tracking-wider">Geri</span>
+                                <span class="text-[10px] font-black uppercase tracking-wider">Vazgeç</span>
                             </button>
                             <p class="text-xs font-black text-indigo-600 uppercase tracking-tighter mx-auto">Gelişim Soruları</p>
                             <span class="text-xs font-bold text-slate-400 w-[40px] text-right">${answeredKeys.length}/${qs.length}</span>
@@ -180,85 +199,124 @@
                             </button>
                         </div>
 
-                        <div class="card p-10 bg-indigo-600 text-white">
-                            <h2 class="text-2xl font-black">Genel Profil & Öykü</h2>
-                            <p class="opacity-80 mt-1 text-sm text-indigo-50">Kapsamlı bir analiz için lütfen kalan alanları doldurun.</p>
+                        <div class="card p-10 bg-indigo-600 text-white shadow-xl shadow-indigo-100">
+                            <h2 class="text-2xl font-black text-center">Genel Profil & Öykü</h2>
+                            <p class="opacity-80 mt-1 text-sm text-indigo-50 text-center font-medium">Kapsamlı bir analiz için lütfen yıldızlı (*) alanları doldurun.</p>
                         </div>
 
-                        <div class="card p-8 space-y-5">
+                        <div id="section-general" class="card p-8 space-y-5">
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Cinsiyet</label>
-                                    <select onchange="updateForm('gender', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1">
-                                        <option value="" ${state.formData.gender === '' ? 'selected' : ''}>Seçiniz</option>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Cinsiyet</label>
+                                    <select id="field-gender" onchange="updateForm('gender', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500">
+                                        <option value="">Seçiniz</option>
                                         <option value="Erkek" ${state.formData.gender === 'Erkek' ? 'selected' : ''}>Erkek</option>
                                         <option value="Kız" ${state.formData.gender === 'Kız' ? 'selected' : ''}>Kız</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Tam Yaşı / Ay</label>
-                                    <input type="text" placeholder="${agePlaceholder}" value="${state.formData.exactAge}" oninput="updateForm('exactAge', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 font-medium">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Tam Yaşı / Ay</label>
+                                    <input id="field-exactAge" type="text" placeholder="${agePlaceholder}" value="${state.formData.exactAge}" oninput="updateForm('exactAge', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500">
                                 </div>
                             </div>
+                            
                             <div>
-                                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Daha önce konulmuş bir tanı veya uzman takibi var mı?</label>
-                                <select onchange="updateForm('diagnosis', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Gelişimsel tanı veya uzman takibi var mı?</label>
+                                <select id="field-diagnosis" onchange="updateForm('diagnosis', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500">
+                                    <option value="">Seçiniz</option>
                                     <option value="Hayır" ${state.formData.diagnosis === 'Hayır' ? 'selected' : ''}>Hayır</option>
                                     <option value="Evet" ${state.formData.diagnosis === 'Evet' ? 'selected' : ''}>Evet</option>
                                 </select>
                             </div>
+
+                            ${state.formData.diagnosis === 'Evet' ? `
+                            <div id="section-specific" class="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Tanı Detayı</label>
+                                    <select id="field-specificDiagnosis" onchange="updateForm('specificDiagnosis', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500 font-bold text-indigo-600">
+                                        <option value="">Seçiniz</option>
+                                        <option value="Atipik Otizm" ${state.formData.specificDiagnosis === 'Atipik Otizm' ? 'selected' : ''}>Atipik Otizm</option>
+                                        <option value="DEHB" ${state.formData.specificDiagnosis === 'DEHB' ? 'selected' : ''}>DEHB (Dikkat Eksikliği ve Hiperaktivite)</option>
+                                        <option value="Özel Öğrenme Güçlüğü" ${state.formData.specificDiagnosis === 'Özel Öğrenme Güçlüğü' ? 'selected' : ''}>Özel Öğrenme Güçlüğü</option>
+                                        <option value="Diğer" ${state.formData.specificDiagnosis === 'Diğer' ? 'selected' : ''}>Diğer</option>
+                                    </select>
+                                </div>
+
+                                ${state.formData.specificDiagnosis === 'Diğer' ? `
+                                <div id="section-other-detail" class="animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Lütfen Belirtiniz</label>
+                                    <input id="field-otherDiagnosisDetail" type="text" placeholder="Tanı ismini buraya yazınız" value="${state.formData.otherDiagnosisDetail}" oninput="updateForm('otherDiagnosisDetail', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500 font-medium">
+                                </div>
+                                ` : ''}
+                            </div>
+                            ` : ''}
+
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kullanılan İlaçlar</label>
-                                <input type="text" placeholder="Varsa belirtin" value="${state.formData.meds}" oninput="updateForm('meds', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 font-medium">
+                                <input type="text" placeholder="Varsa belirtin" value="${state.formData.meds}" oninput="updateForm('meds', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500">
                             </div>
                         </div>
 
                         ${state.ageGroup === 'infant' ? `
-                        <div class="card p-8 text-slate-800">
+                        <div class="card p-8">
                             <label class="text-[10px] font-black text-indigo-600 uppercase">Doğum Öncesi & Doğum Anı</label>
-                            <textarea oninput="updateForm('birthInfo', this.value)" placeholder="Gebelikte risk, zor doğum, kuvöz vb." class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-2 h-24 resize-none text-sm font-medium">${state.formData.birthInfo}</textarea>
+                            <textarea oninput="updateForm('birthInfo', this.value)" placeholder="Gebelikte risk, zor doğum, kuvöz vb." class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-2 h-24 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.birthInfo}</textarea>
                         </div>` : ''}
 
                         <div class="card p-8 space-y-4 text-slate-800">
                             <h4 class="text-xs font-black text-indigo-600 uppercase border-b pb-2">Davranış & Duyusal</h4>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase">Günlük Rutin, Yönerge Takibi & Öfke</label>
-                                <textarea oninput="updateForm('routine', this.value)" placeholder="Rutinleri nasıl? Yönerge alır mı? Öfke nöbeti sıklığı nedir?" class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-1 h-20 resize-none text-sm font-medium">${state.formData.routine}</textarea>
+                                <textarea oninput="updateForm('routine', this.value)" placeholder="Rutinleri nasıl? Yönerge alır mı? Öfke nöbeti sıklığı nedir?" class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-1 h-20 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.routine}</textarea>
                             </div>
                             <div>
                                 <label class="text-[10px] font-black text-slate-400 uppercase">Duyusal Profil & Tekrarlayıcı Hareketler</label>
-                                <textarea oninput="updateForm('sensitivity', this.value)" placeholder="Ses/Işık hassasiyeti, ağrı eşiği, sallanma/dönme var mı?" class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-1 h-20 resize-none text-sm font-medium">${state.formData.sensitivity}</textarea>
+                                <textarea oninput="updateForm('sensitivity', this.value)" placeholder="Ses/Işık hassasiyeti, ağrı eşiği, sallanma/dönme var mı?" class="w-full p-4 bg-slate-50 rounded-xl outline-none mt-1 h-20 resize-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">${state.formData.sensitivity}</textarea>
                             </div>
                         </div>
 
                         <div class="card p-8 space-y-5">
-                            <h4 class="text-xs font-black text-indigo-600 uppercase border-b pb-2">İlgi Alanları & Motivasyon Kaynakları</h4>
+                            <h4 class="text-xs font-black text-indigo-600 uppercase border-b pb-2">İlgi Alanları & Motivasyon</h4>
                             <div class="flex flex-wrap gap-2 py-2">
-                                ${['Müzik', 'Park', 'Kitap', 'Su', 'Resim', 'Dans', 'Bloklar', 'Spor'].map(item => `
+                                ${['Müzik', 'Park', 'Kitap', 'Su', 'Resim', 'Dans', 'Bloklar', 'Spor', 'Diğer'].map(item => `
                                     <label class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg cursor-pointer text-xs font-bold border border-transparent transition-all ${state.formData.likes.includes(item) ? 'border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm' : ''}">
                                         <input type="checkbox" ${state.formData.likes.includes(item) ? 'checked' : ''} onchange="toggleLike('${item}')" class="hidden"> ${item}
                                     </label>`).join('')}
                             </div>
+                            
+                            ${state.formData.likes.includes('Diğer') ? `
+                                <div class="mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Lütfen Belirtiniz (Opsiyonel)</label>
+                                    <input id="field-otherLikeDetail" type="text" placeholder="Diğer ilgi alanlarını buraya yazabilirsiniz" value="${state.formData.otherLikeDetail}" oninput="updateForm('otherLikeDetail', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border-2 border-transparent focus:border-indigo-500 font-medium">
+                                </div>
+                            ` : ''}
 
                             <h4 class="text-xs font-black text-indigo-600 uppercase border-b pb-2">Gözlem & Hedefler</h4>
-                            <input type="text" placeholder="Sizce en büyük gelişimsel problem nedir?" value="${state.formData.biggestProblem}" oninput="updateForm('biggestProblem', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium">
-                            <input type="text" placeholder="Öncelikli hedefiniz ne? (Konuşma, sosyal uyum vb.)" value="${state.formData.primaryGoal}" oninput="updateForm('primaryGoal', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium">
+                            <input type="text" placeholder="Sizce en büyük gelişimsel problem nedir?" value="${state.formData.biggestProblem}" oninput="updateForm('biggestProblem', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">
+                            <input type="text" placeholder="Öncelikli hedefiniz ne? (Konuşma, sosyal uyum vb.)" value="${state.formData.primaryGoal}" oninput="updateForm('primaryGoal', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border-2 border-transparent focus:border-indigo-500">
                             
-                            <div class="pt-4 space-y-3 border-t">
-                                <input id="name-input" type="text" placeholder="Veli Ad Soyad" value="${state.formData.name}" oninput="updateForm('name', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold text-slate-800 border-2 border-transparent focus:border-indigo-500 transition-all">
-                                <input id="phone-input" type="tel" maxlength="11" placeholder="Telefon (05xx xxx xx xx)" value="${state.formData.phone}" oninput="updateForm('phone', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold text-slate-800 border-2 border-transparent focus:border-indigo-500 transition-all">
-                                <label class="flex items-start gap-3 p-1 cursor-pointer">
-                                    <input type="checkbox" ${state.formData.kvkk ? 'checked' : ''} onchange="updateForm('kvkk', this.checked); render();" class="mt-1 w-5 h-5 accent-indigo-600">
+                            <div id="section-contact" class="pt-4 space-y-3 border-t">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Ad Soyad</label>
+                                    <input id="field-name" type="text" placeholder="Veli Ad Soyad" value="${state.formData.name}" oninput="updateForm('name', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold text-slate-800 border-2 border-transparent focus:border-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1 required-label">Telefon</label>
+                                    <input id="field-phone" type="tel" maxlength="11" placeholder="05xx xxx xx xx" value="${state.formData.phone}" oninput="updateForm('phone', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold text-slate-800 border-2 border-transparent focus:border-indigo-500">
+                                </div>
+                                <label id="container-kvkk" class="flex items-start gap-3 p-2 cursor-pointer rounded-xl transition-all border-2 border-transparent">
+                                    <input id="field-kvkk" type="checkbox" ${state.formData.kvkk ? 'checked' : ''} onchange="updateForm('kvkk', this.checked); render();" class="mt-1 w-5 h-5 accent-indigo-600">
                                     <span class="text-[11px] text-slate-500 font-medium leading-tight">
                                         <span onclick="openModal()" class="text-indigo-600 font-bold underline cursor-pointer">KVKK aydınlatma metnini</span> okudum ve kabul ediyorum.
                                     </span>
                                 </label>
                             </div>
-                            <button id="finalSubmitBtn" disabled onclick="submitToMake()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl btn-active disabled:opacity-30 disabled:cursor-not-allowed transition-all">Analizi Tamamla ve Gönder</button>
+                            <button id="finalSubmitBtn" onclick="handleFinalSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl btn-active transition-all">Analizi Tamamla ve Gönder</button>
                         </div>
                     </div>
                 </div>`;
-            setTimeout(validateFinalForm, 0);
+            
+            setTimeout(updateButtonStyle, 0);
         }
 
         function renderSuccess(app) {
@@ -269,12 +327,21 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                         </div>
                         <div class="space-y-4">
-                            <h2 class="text-3xl font-black text-slate-900 tracking-tight">Bilgileriniz Alındı!</h2>
-                            <p class="text-slate-600 font-medium leading-relaxed">Uzmanımız verilerinizi yapay zeka desteğiyle analiz ederek en kısa sürede sizinle iletişime geçecektir.</p>
+                            <h2 class="text-3xl font-black text-slate-900 leading-tight">Başvurunuz Alındı!</h2>
+                            <p class="text-slate-600 font-medium leading-relaxed italic text-sm">Uzmanımız verilerinizi analiz ederek en kısa sürede sizinle iletişime geçecektir.</p>
+                            <div class="mt-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                                <p class="text-indigo-700 text-sm font-bold flex items-center justify-center gap-2 italic">
+                                    <span class="w-2 h-2 bg-indigo-500 rounded-full animate-ping"></span>
+                                    Ana sayfaya yönlendiriliyorsunuz...
+                                </p>
+                            </div>
                         </div>
-                        <button onclick="safeRedirect('https://ozeldokunus.com')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold btn-active shadow-xl">Anasayfaya Dön</button>
+                        <p class="text-xs text-slate-400">
+                            Yönlendirme gerçekleşmezse <button onclick="safeRedirect('https://ozeldokunus.com')" class="text-indigo-600 underline font-bold">buraya tıklayın</button>.
+                        </p>
                     </div>
                 </div>`;
+            setTimeout(() => { safeRedirect('https://ozeldokunus.com'); }, 5000);
         }
 
         // --- FONKSİYONLAR ---
@@ -303,30 +370,118 @@
 
         function updateForm(key, val) { 
             state.formData[key] = (key === 'phone') ? val.replace(/\D/g, '') : val; 
-            validateFinalForm();
+            
+            if (key === 'diagnosis') {
+                if (val !== 'Evet') {
+                    state.formData.specificDiagnosis = '';
+                    state.formData.otherDiagnosisDetail = '';
+                }
+                render(); 
+            }
+            
+            if (key === 'specificDiagnosis') {
+                if (val !== 'Diğer') state.formData.otherDiagnosisDetail = '';
+                render();
+            }
+
+            // Diğer ilgi alanı işaretlendiğinde inputu göstermek için render şart
+            if (key === 'otherLikeDetail') {
+                // Sadece veriyi güncelle, butonu kontrol et
+            }
+
+            updateButtonStyle();
         }
 
-        function validateFinalForm() {
-            const btn = document.getElementById('finalSubmitBtn');
-            if (!btn) return;
+        function checkValidity() {
             const isNameValid = state.formData.name.trim().length >= 3;
             const isPhoneValid = /^05\d{9}$/.test(state.formData.phone);
             const isKvkkValid = state.formData.kvkk;
-            if (isNameValid && isPhoneValid && isKvkkValid) {
-                btn.disabled = false;
+            const isGenderValid = state.formData.gender !== '';
+            const isAgeValid = state.formData.exactAge.trim().length > 0;
+            const isDiagnosisValid = state.formData.diagnosis !== '';
+            
+            const isSpecificDiagnosisValid = state.formData.diagnosis === 'Evet' ? state.formData.specificDiagnosis !== '' : true;
+            const isOtherDetailValid = (state.formData.diagnosis === 'Evet' && state.formData.specificDiagnosis === 'Diğer') 
+                ? state.formData.otherDiagnosisDetail.trim().length > 0 
+                : true;
+
+            // otherLikeDetail opsiyonel olduğu için burada kontrol etmiyoruz
+
+            return {
+                name: isNameValid,
+                phone: isPhoneValid,
+                kvkk: isKvkkValid,
+                gender: isGenderValid,
+                exactAge: isAgeValid,
+                diagnosis: isDiagnosisValid,
+                specificDiagnosis: isSpecificDiagnosisValid,
+                otherDiagnosisDetail: isOtherDetailValid
+            };
+        }
+
+        function updateButtonStyle() {
+            const btn = document.getElementById('finalSubmitBtn');
+            if (!btn) return;
+            const valid = Object.values(checkValidity()).every(v => v);
+            if (valid) {
                 btn.classList.remove('opacity-30', 'cursor-not-allowed');
             } else {
-                btn.disabled = true;
-                btn.classList.add('opacity-30', 'cursor-not-allowed');
+                btn.classList.add('opacity-30');
+            }
+        }
+
+        function handleFinalSubmit() {
+            const validity = checkValidity();
+            const allValid = Object.values(validity).every(v => v);
+
+            if (allValid) {
+                submitToMake();
+                return;
+            }
+
+            let firstErrorElement = null;
+            
+            const fieldMap = {
+                gender: 'field-gender',
+                exactAge: 'field-exactAge',
+                diagnosis: 'field-diagnosis',
+                specificDiagnosis: 'field-specificDiagnosis',
+                otherDiagnosisDetail: 'field-otherDiagnosisDetail',
+                name: 'field-name',
+                phone: 'field-phone',
+                kvkk: 'container-kvkk'
+            };
+
+            Object.entries(validity).forEach(([field, isValid]) => {
+                const elementId = fieldMap[field];
+                const element = document.getElementById(elementId);
+                if (element) {
+                    if (!isValid) {
+                        element.classList.add('field-error', 'shake');
+                        if (!firstErrorElement) firstErrorElement = element;
+                        setTimeout(() => { element.classList.remove('shake'); }, 600);
+                    } else {
+                        element.classList.remove('field-error');
+                    }
+                }
+            });
+
+            if (firstErrorElement) {
+                firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstErrorElement.focus();
             }
         }
 
         function toggleLike(item) {
             const idx = state.formData.likes.indexOf(item);
-            if (idx > -1) state.formData.likes.splice(idx, 1);
-            else state.formData.likes.push(item);
+            if (idx > -1) {
+                state.formData.likes.splice(idx, 1);
+                if (item === 'Diğer') state.formData.otherLikeDetail = '';
+            } else {
+                state.formData.likes.push(item);
+            }
             render();
-            validateFinalForm();
+            updateButtonStyle();
         }
 
         function openModal() { document.getElementById('kvkkModal').style.display = 'flex'; }
@@ -341,7 +496,7 @@
             }
             
             const answersText = Object.entries(state.answers).map(([id, val]) => {
-                const allQs = [...DATA.infant, ...DATA.preschool, ...DATA.primary];
+                const allQs = Object.values(DATA).flat();
                 const q = allQs.find(q => q.id === id);
                 return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
             }).join('\n');
