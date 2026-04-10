@@ -33,7 +33,7 @@
     <script>
         // WEBHOOK VE FORMSPREE AYARLARI
         const makeWebhookUrl = "https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz";
-        const formspreeUrl = "https://formspree.io/f/mpqoblva";
+        const formspreeUrl = "https://formspree.io/f/mpqoblva"; // Sizin Formspree ID'niz
 
         const DATA = {
             infant: [
@@ -107,7 +107,7 @@
                 <div class="min-h-screen p-4 md:p-8 flex flex-col items-center">
                     <div class="max-w-2xl w-full sticky top-4 z-20 mb-8 card p-4 backdrop-blur-md bg-white/90">
                         <div class="flex items-center justify-between mb-2">
-                            <button onclick="changeView('landing')" class="text-[10px] font-black uppercase text-slate-400">Geri Dön</button>
+                            <button onclick="changeView('landing')" class="text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600">Geri Dön</button>
                             <span class="text-xs font-bold text-indigo-600">Soru ${answeredCount} / ${qs.length}</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -125,7 +125,7 @@
                             </div>`).join('')}
                     </div>
                     <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
-                        <button id="nextBtn" ${answeredCount < qs.length ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 btn-active transition-all">Bilgileri Tamamla</button>
+                        <button id="nextBtn" ${answeredCount < qs.length ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 btn-active transition-all">Bilgilere Geç</button>
                     </div>
                 </div>`;
         }
