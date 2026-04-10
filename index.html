@@ -53,7 +53,7 @@
                 { id: "pri_1", text: "Okurken satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, m-n) karıştırıyor mu?" },
                 { id: "pri_2", text: "Okuma hızı sınıf ortalamasının altında mı?" },
                 { id: "pri_3", text: "Matematiksel sembolleri karıştırıyor veya parmak sayıyor mu?" },
-                { id: "pri_4", text: "Yazı yazarken harf eksik bırakıyor mu?" },
+                { id: "pri_4", text: "Yazı yazarken harf eksik bırakıyor mu veya defter düzeni kurmakta zorlanıyor mu?" },
                 { id: "pri_5", text: "Sağ-sol ayrımı yapmakta veya zaman kavramlarını karıştırıyor mu?" }
             ]
         };
@@ -178,13 +178,32 @@
                                 </select></div>
                                 ${state.formData.specificDiagnosis === 'Diğer' ? `
                                 <input type="text" placeholder="Lütfen tanıyı yazınız" value="${state.formData.otherDiagnosisDetail}" oninput="updateForm('otherDiagnosisDetail', this.value)" class="w-full p-3 bg-white rounded-xl outline-none border font-medium">` : ''}
+                                
+                                <div><label class="text-[10px] font-black text-slate-400 uppercase">Kullanılan İlaçlar</label>
+                                <input type="text" placeholder="Varsa belirtin" value="${state.formData.meds}" oninput="updateForm('meds', this.value)" class="w-full p-3 bg-white rounded-xl outline-none mt-1 border"></div>
+                            </div>` : `
+                                <div><label class="text-[10px] font-black text-slate-400 uppercase">Kullanılan İlaçlar</label>
+                                <input type="text" placeholder="Varsa belirtin" value="${state.formData.meds}" oninput="updateForm('meds', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border"></div>
+                            `}
+
+                            ${state.ageGroup === 'infant' ? `
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase">Doğum Öncesi & Doğum Anı</label>
+                                <textarea oninput="updateForm('birthInfo', this.value)" placeholder="Gebelikte risk, zor doğum, kuvöz vb." class="w-full p-4 bg-slate-50 rounded-xl outline-none h-24 text-sm font-medium border">${state.formData.birthInfo}</textarea>
                             </div>` : ''}
 
-                            <textarea oninput="updateForm('routine', this.value)" placeholder="Günlük rutinler, duyusal hassasiyetler, öfke durumları..." class="w-full p-4 bg-slate-50 rounded-xl outline-none h-24 text-sm font-medium border">${state.formData.routine}</textarea>
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black text-slate-400 uppercase">Davranış & Duyusal Profil</label>
+                                <textarea oninput="updateForm('routine', this.value)" placeholder="Günlük rutinler, yönerge takibi, öfke durumları..." class="w-full p-4 bg-slate-50 rounded-xl outline-none h-20 text-sm font-medium border">${state.formData.routine}</textarea>
+                                <textarea oninput="updateForm('sensitivity', this.value)" placeholder="Duyusal hassasiyetler (ses, ışık, dokunma vb.)..." class="w-full p-4 bg-slate-50 rounded-xl outline-none h-20 text-sm font-medium border">${state.formData.sensitivity}</textarea>
+                            </div>
                             
-                            <input type="text" placeholder="En büyük gelişimsel problem nedir?" value="${state.formData.biggestProblem}" oninput="updateForm('biggestProblem', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border">
-                            <input type="text" placeholder="Öncelikli hedefiniz ne?" value="${state.formData.primaryGoal}" oninput="updateForm('primaryGoal', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border">
-                            
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase">Problem & Hedef</label>
+                                <input type="text" placeholder="En büyük gelişimsel problem nedir?" value="${state.formData.biggestProblem}" oninput="updateForm('biggestProblem', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border">
+                                <input type="text" placeholder="Öncelikli hedefiniz ne?" value="${state.formData.primaryGoal}" oninput="updateForm('primaryGoal', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none text-sm font-medium border">
+                            </div>
+
                             <div class="space-y-4 pt-4 border-t">
                                 <input type="text" placeholder="Veli Ad Soyad" value="${state.formData.name}" oninput="updateForm('name', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold border focus:border-indigo-500">
                                 <input type="tel" maxlength="11" placeholder="Telefon (05xx...)" value="${state.formData.phone}" oninput="updateForm('phone', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold border focus:border-indigo-500">
@@ -260,7 +279,7 @@
                 submittedAt: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }) 
             };
             
-            // Dual Send: Formspree (Ham Veri) + Make.com (AI Analiz)
+            // Dual Send
             fetch(formspreeUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) });
             
             try {
