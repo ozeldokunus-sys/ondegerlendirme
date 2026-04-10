@@ -31,6 +31,7 @@
     <div id="app"></div>
 
     <script>
+        // WEBHOOK VE FORMSPREE AYARLARI
         const makeWebhookUrl = "https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz";
         const formspreeUrl = "https://formspree.io/f/mpqoblva";
 
@@ -53,7 +54,7 @@
                 { id: "pri_1", text: "Okurken satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, m-n) karıştırıyor mu?" },
                 { id: "pri_2", text: "Okuma hızı sınıf ortalamasının altında mı?" },
                 { id: "pri_3", text: "Matematiksel sembolleri karıştırıyor veya parmak sayıyor mu?" },
-                { id: "pri_4", text: "Yazı yazarken harf eksik bırakıyor mu veya defter düzeni kurmakta zorlanıyor mu?" },
+                { id: "pri_4", text: "Yazı yazarken harf eksik bırakıyor mu?" },
                 { id: "pri_5", text: "Sağ-sol ayrımı yapmakta veya zaman kavramlarını karıştırıyor mu?" }
             ]
         };
@@ -84,20 +85,14 @@
                 <div class="min-h-screen flex items-center justify-center p-6 fade-in text-center">
                     <div class="max-w-4xl w-full space-y-12">
                         <div class="space-y-4">
-                            <span class="text-indigo-600 font-extrabold text-sm tracking-widest uppercase">Özel Dokunuş Eğitim Danışmanlık</span>
+                            <span class="text-indigo-600 font-extrabold text-sm tracking-widest uppercase tracking-tight">Özel Dokunuş Eğitim Danışmanlık</span>
                             <h1 class="text-4xl md:text-6xl font-black text-slate-900 leading-tight">Gelişim Analiz <br/><span class="text-indigo-600">Sistemi</span></h1>
-                            <p class="text-slate-500 text-lg font-medium">Lütfen yaş grubunu seçerek taramayı başlatın.</p>
+                            <p class="text-slate-500 text-lg font-medium">Uzman destekli ön değerlendirme için yaş grubunu seçin.</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <button onclick="changeView('quiz', 'infant')" class="card p-8 hover:border-indigo-400 btn-active text-left">
-                                <h3 class="text-xl font-black text-slate-800">0-2 Yaş</h3>
-                            </button>
-                            <button onclick="changeView('quiz', 'preschool')" class="card p-8 hover:border-indigo-400 btn-active text-left">
-                                <h3 class="text-xl font-black text-slate-800">3-6 Yaş</h3>
-                            </button>
-                            <button onclick="changeView('quiz', 'primary')" class="card p-8 hover:border-indigo-400 btn-active text-left">
-                                <h3 class="text-xl font-black text-slate-800">7-12 Yaş</h3>
-                            </button>
+                            <button onclick="changeView('quiz', 'infant')" class="card p-8 hover:border-indigo-400 btn-active text-left"><h3 class="text-xl font-black text-slate-800">0-2 Yaş</h3></button>
+                            <button onclick="changeView('quiz', 'preschool')" class="card p-8 hover:border-indigo-400 btn-active text-left"><h3 class="text-xl font-black text-slate-800">3-6 Yaş</h3></button>
+                            <button onclick="changeView('quiz', 'primary')" class="card p-8 hover:border-indigo-400 btn-active text-left"><h3 class="text-xl font-black text-slate-800">7-12 Yaş</h3></button>
                         </div>
                     </div>
                 </div>`;
@@ -112,8 +107,8 @@
                 <div class="min-h-screen p-4 md:p-8 flex flex-col items-center">
                     <div class="max-w-2xl w-full sticky top-4 z-20 mb-8 card p-4 backdrop-blur-md bg-white/90">
                         <div class="flex items-center justify-between mb-2">
-                            <button onclick="changeView('landing')" class="text-[10px] font-black uppercase text-slate-400">Geri</button>
-                            <span class="text-xs font-bold text-indigo-600">${answeredCount} / ${qs.length}</span>
+                            <button onclick="changeView('landing')" class="text-[10px] font-black uppercase text-slate-400">Geri Dön</button>
+                            <span class="text-xs font-bold text-indigo-600">Soru ${answeredCount} / ${qs.length}</span>
                         </div>
                         <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                             <div class="progress-bar bg-indigo-600 h-full" style="width: ${progress}%"></div>
@@ -124,22 +119,24 @@
                             <div id="q-${q.id}" class="card question-card p-8 ${state.answers[q.id] !== undefined ? 'bg-indigo-50/10' : ''}">
                                 <p class="text-lg font-bold text-slate-800 mb-6 leading-snug">${idx + 1}. ${q.text}</p>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
-                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
+                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
+                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
                                 </div>
                             </div>`).join('')}
                     </div>
                     <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
-                        <button id="nextBtn" ${answeredCount < qs.length ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 btn-active">Bilgilere Geç</button>
+                        <button id="nextBtn" ${answeredCount < qs.length ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 btn-active transition-all">Bilgileri Tamamla</button>
                     </div>
                 </div>`;
         }
 
         function renderDetails(app) {
+            let agePlaceholder = state.ageGroup === 'infant' ? "Örn: 18 Aylık" : "Örn: 9 Yaş";
+
             app.innerHTML = `
                 <div class="min-h-screen p-4 md:p-8 flex flex-col items-center pb-20">
                     <div class="max-w-2xl w-full space-y-8">
-                        <button onclick="changeView('quiz')" class="px-5 py-2.5 bg-white border rounded-full text-xs font-bold text-slate-500 btn-active">Sorulara Dön</button>
+                        <button onclick="changeView('quiz')" class="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-xs font-bold text-slate-500 btn-active shadow-sm flex items-center gap-2"><span>&larr;</span> Sorulara Dön</button>
                         
                         <div class="card p-8 space-y-6">
                             <h2 class="text-2xl font-black text-center text-indigo-900 border-b pb-4">Genel Profil & Öykü</h2>
@@ -150,7 +147,7 @@
                                     <option value="">Seçiniz</option><option value="Erkek" ${state.formData.gender === 'Erkek' ? 'selected' : ''}>Erkek</option><option value="Kız" ${state.formData.gender === 'Kız' ? 'selected' : ''}>Kız</option>
                                 </select></div>
                                 <div><label class="text-[10px] font-black text-slate-400 uppercase required-label">Tam Yaşı</label>
-                                <input type="text" placeholder="Örn: 5 Yaş" value="${state.formData.exactAge}" oninput="updateForm('exactAge', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border"></div>
+                                <input type="text" placeholder="${agePlaceholder}" value="${state.formData.exactAge}" oninput="updateForm('exactAge', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border"></div>
                             </div>
 
                             <label class="block">
@@ -174,6 +171,8 @@
                                 <input type="text" placeholder="Lütfen tanıyı belirtiniz" value="${state.formData.otherDiagnosisDetail}" oninput="updateForm('otherDiagnosisDetail', this.value)" class="w-full p-3 bg-white rounded-xl outline-none border font-medium">` : ''}
                             </div>` : ''}
 
+                            <textarea oninput="updateForm('routine', this.value)" placeholder="Günlük rutinler, duyusal hassasiyetler, öfke durumları..." class="w-full p-4 bg-slate-50 rounded-xl outline-none h-24 text-sm font-medium border">${state.formData.routine}</textarea>
+
                             <div class="pt-6 border-t space-y-4">
                                 <div><label class="text-[10px] font-black text-slate-400 uppercase required-label ml-1">Veli Ad Soyad</label>
                                 <input type="text" placeholder="Ad Soyad" value="${state.formData.name}" oninput="updateForm('name', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold border focus:border-indigo-500"></div>
@@ -181,7 +180,7 @@
                                 <input type="tel" maxlength="11" placeholder="05xx xxx xx xx" value="${state.formData.phone}" oninput="updateForm('phone', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold border focus:border-indigo-500"></div>
                                 <label class="flex items-start gap-3 p-2 cursor-pointer transition-all">
                                     <input type="checkbox" ${state.formData.kvkk ? 'checked' : ''} onchange="updateForm('kvkk', this.checked); validateForm();" class="mt-1 w-5 h-5 accent-indigo-600">
-                                    <span class="text-[11px] text-slate-500 font-medium leading-relaxed italic">KVKK metnini okudum, verilerimin uzman değerlendirmesi amacıyla işlenmesini kabul ediyorum.</span>
+                                    <span class="text-[11px] text-slate-500 font-medium italic">KVKK metnini okudum, verilerimin uzman değerlendirmesi amacıyla işlenmesini kabul ediyorum.</span>
                                 </label>
                             </div>
 
@@ -196,19 +195,17 @@
             app.innerHTML = `
                 <div class="min-h-screen flex items-center justify-center p-6 text-center fade-in">
                     <div class="max-w-md w-full card p-12 space-y-8 shadow-2xl">
-                        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce shadow-inner">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce shadow-inner">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                         </div>
                         <h2 class="text-3xl font-black text-slate-900 leading-tight">Başvurunuz Alındı!</h2>
-                        <p class="text-slate-600 text-sm font-medium italic">Veli iletişim bilgileriniz ve test yanıtlarınız sisteme kaydedildi. Raporunuz hazırlanıyor.</p>
+                        <p class="text-slate-600 text-sm font-medium italic">Veli bilgileriniz ve test yanıtlarınız sisteme kaydedildi. Raporunuz hazırlanıyor.</p>
                     </div>
                 </div>`;
             setTimeout(() => window.open('https://ozeldokunus.com', '_top'), 5000);
         }
 
-        function changeView(view, group = null) { 
-            state.view = view; if (group) state.ageGroup = group; render(); window.scrollTo(0, 0); 
-        }
+        function changeView(view, group = null) { state.view = view; if (group) state.ageGroup = group; render(); window.scrollTo(0, 0); }
         
         function handleAnswer(id, val, idx) { 
             state.answers[id] = val; render(); 
@@ -221,11 +218,7 @@
             }
         }
 
-        function updateForm(key, val) { 
-            state.formData[key] = (key === 'phone') ? val.replace(/\D/g, '') : val; 
-            if (key === 'diagnosis' || key === 'specificDiagnosis') render();
-            validateForm(); 
-        }
+        function updateForm(key, val) { state.formData[key] = (key === 'phone') ? val.replace(/\D/g, '') : val; if (key === 'diagnosis' || key === 'specificDiagnosis') render(); validateForm(); }
 
         function validateForm() {
             const btn = document.getElementById('finalSubmitBtn');
@@ -250,13 +243,21 @@
                 submittedAt: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }) 
             };
             
-            // Dual Gönderim: Hem Formspree hem Make.com
-            fetch(formspreeUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload) });
-            
-            try {
-                await fetch(makeWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            // KESİN GÖNDERİM MANTIĞI: Her iki servisi aynı anda tetikle
+            Promise.allSettled([
+                fetch(formspreeUrl, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                }),
+                fetch(makeWebhookUrl, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                })
+            ]).finally(() => {
                 changeView('success');
-            } catch (e) { changeView('success'); }
+            });
         }
 
         render();
