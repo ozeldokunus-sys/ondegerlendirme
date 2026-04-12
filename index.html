@@ -3,261 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Özel Dokunuş - Gelişim Analiz Sistemi</title>
+    <title>Özel Dokunuş - Ön Değerlendirme Sistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            -webkit-tap-highlight-color: transparent;
             background-color: #F8FAFC;
-            margin: 0; padding: 0;
+            color: #1E293B;
             scroll-behavior: smooth;
         }
         .progress-bar { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-active:active { transform: scale(0.96); }
+        .card { background: white; border-radius: 2rem; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02); }
+        .btn-active:active { transform: scale(0.97); }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
-        input, textarea, select { font-size: 16px !important; transition: all 0.2s ease; }
-        .card { background: white; border-radius: 2rem; border: 1px solid #F1F5F9; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); transition: all 0.3s ease; }
-        .question-card { scroll-margin-top: 120px; }
-        .required-label::after { content: " *"; color: #ef4444; }
+        .option-btn { border: 2px solid #E2E8F0; transition: all 0.2s; padding: 1rem; border-radius: 1rem; font-weight: 700; text-align: center; background: white; }
+        .option-btn.selected { border-color: #4F46E5; background-color: #EEF2FF; color: #4F46E5; }
+        .question-card { scroll-margin-top: 120px; transition: opacity 0.3s; }
+        .kvkk-box { font-size: 0.75rem; height: 100px; overflow-y: auto; background: #f1f5f9; padding: 10px; border-radius: 0.75rem; border: 1px solid #e2e8f0; margin-bottom: 1rem; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
     <div id="app"></div>
 
     <script>
-        // WEBHOOK VE FORMSPREE AYARLARI
-        const makeWebhookUrl = "https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz";
-        const formspreeUrl = "https://formspree.io/f/mpqoblva"; // Sizin Formspree ID'niz
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/mpqoblva";
 
-        const DATA = {
-            infant: [
-                { id: "inf_1", text: "Göz teması kuruyor, sizinle duygusal etkileşime giriyor ve yüzünüze odaklanıyor mu?" },
-                { id: "inf_2", text: "Seslere tepki veriyor, ismiyle seslenildiğinde dönüp bakıyor mu?" },
-                { id: "inf_3", text: "İlgisini çeken bir nesneyi parmağıyla gösterip sizin de bakmanızı bekliyor mu?" },
-                { id: "inf_4", text: "Sosyal gülümseme veya taklit etme eğilimi var mı?" },
-                { id: "inf_5", text: "Yaşına uygun heceleme veya basit kelime denemeleri yapıyor mu?" }
-            ],
-            preschool: [
-                { id: "pre_1", text: "İsmiyle seslenildiğinde dönüp bakıyor veya karşılık veriyor mu?" },
-                { id: "pre_2", text: "İlgisini çeken bir nesneyi parmağıyla göstererek sizinle paylaşıyor mu?" },
-                { id: "pre_3", text: "Diğer çocukların oyunlarına dahil olmaya çalışıyor mu?" },
-                { id: "pre_4", text: "Düzenli, anlamlı ve derinlemesine göz teması kuruyor mu?" },
-                { id: "pre_5", text: "Hayali oyunlar oynuyor mu?" }
-            ],
-            primary: [
-                { id: "pri_1", text: "Okurken satır atlıyor, kelime sonlarını uyduruyor veya harfleri (b-d, m-n) karıştırıyor mu?" },
-                { id: "pri_2", text: "Okuma hızı sınıf ortalamasının altında mı?" },
-                { id: "pri_3", text: "Matematiksel sembolleri karıştırıyor veya parmak sayıyor mu?" },
-                { id: "pri_4", text: "Yazı yazarken harf eksik bırakıyor mu?" },
-                { id: "pri_5", text: "Sağ-sol ayrımı yapmakta veya zaman kavramlarını karıştırıyor mu?" }
-            ]
+        const TRACKS = {
+            autism_early: {
+                title: "Erken Çocukluk Otizm Tarama",
+                questions: [
+                    { id: "ae1", type: "boolean", text: "İsmiyle seslenildiğinde (duyma sorunu yoksa) dönüp bakıyor mu?" },
+                    { id: "ae2", type: "boolean", text: "İlgisini çeken bir nesneyi parmağıyla size gösteriyor mu?" },
+                    { id: "ae3", type: "boolean", text: "Sizin işaret ettiğiniz bir nesneye bakıyor mu?" },
+                    { id: "ae4", type: "boolean", text: "Sizinle veya başkalarıyla düzenli göz teması kuruyor mu?" },
+                    { id: "ae5", type: "scale", text: "Sosyal gülümseme (karşılık olarak gülme) sıklığı nedir? (1: Hiç, 5: Çok Sık)" },
+                    { id: "ae6", type: "boolean", text: "Çocuğunuz tekli kelimeler kullanarak konuşuyor mu?", logic: true },
+                    { id: "ae7", type: "open", text: "Varsa kelimelerini nasıl kullanıyor? (Örn: Sadece ihtiyacı olduğunda, ekolali yaparak vb.)", condition: (ans) => ans.ae6 === true },
+                    { id: "ae8", type: "boolean", text: "Parmak ucunda yürüme veya kendi etrafında dönme gibi hareketler var mı?" },
+                    { id: "ae9", type: "scale", text: "Seslere veya dokunmaya karşı aşırı hassasiyeti (kulak kapama vb.) düzeyi? (1: Normal, 5: Çok Hassas)" },
+                    { id: "ae10", type: "boolean", text: "Nesneleri döndürmek veya sıraya dizmek gibi takıntılı oyunları var mı?" },
+                    { id: "ae11", type: "choice", text: "Günde ortalama kaç saat ekran maruziyeti (TV/Tablet) var?", options: ["0-3 Saat", "3-6 Saat", "6+ Saat"] },
+                    { id: "ae12", type: "boolean", text: "Karşılıklı 'ce-ee' veya taklit oyunlarına katılıyor mu?" }
+                ]
+            },
+            learning: {
+                title: "Özel Öğrenme Güçlüğü (İlkokul)",
+                questions: [
+                    { id: "ld1", type: "boolean", text: "Okurken sık sık satır atlıyor veya kelime sonlarını uyduruyor mu?" },
+                    { id: "ld2", type: "scale", text: "Okuma hızı sınıf ortalamasına göre ne düzeyde? (1: Çok Yavaş, 5: Çok Hızlı)" },
+                    { id: "ld3", type: "boolean", text: "b-d, m-n, p-q gibi benzer harfleri birbirine karıştırıyor mu?" },
+                    { id: "ld4", type: "boolean", text: "Yazı yazarken harf, hece veya kelime eksiltiyor mu?" },
+                    { id: "ld5", type: "boolean", text: "Okuduğu bir metni özetlemekte veya ana fikri anlamakta zorlanıyor mu?" },
+                    { id: "ld6", type: "boolean", text: "Basit matematik işlemlerinde hala parmak saymaya devam ediyor mu?", logic: true },
+                    { id: "ld7", type: "scale", text: "Çarpım tablosunu ezberlemekte veya sayı dizilerini hatırlamakta zorluk düzeyi?", condition: (ans) => ans.ld6 === true },
+                    { id: "ld8", type: "boolean", text: "Sağ-sol ayrımı yapmakta veya ayakkabı bağlamakta zorlanıyor mu?" },
+                    { id: "ld9", type: "boolean", text: "Analog saat okumayı öğrenmekte direnç gösteriyor mu?" },
+                    { id: "ld10", type: "open", text: "Okula gitme isteği ve akademik görevlere karşı tutumu nasıl?" },
+                    { id: "ld11", type: "boolean", text: "Tahtadaki yazıyı defterine geçirirken çok yavaş mı veya hatalı mı yazıyor?" },
+                    { id: "ld12", type: "scale", text: "Özgüven düzeyi akademik başarısızlığa bağlı olarak nasıl etkilenmiş?" }
+                ]
+            },
+            autism_school: {
+                title: "Otizm Belirtileri (Okul Çağı)",
+                questions: [
+                    { id: "as1", type: "boolean", text: "Şakaları, mecazları veya ironileri anlamakta güçlük çekiyor mu?" },
+                    { id: "as2", type: "scale", text: "Akranlarıyla arkadaşlık kurma ve sürdürme isteği? (1: Hiç Yok, 5: Çok İstekli)" },
+                    { id: "as3", type: "boolean", text: "Hep aynı kısıtlı ilgi alanları (örn: trenler, haritalar) hakkında tek taraflı mı konuşuyor?" },
+                    { id: "as4", type: "boolean", text: "Sosyal bir ortamda 'nasıl davranılması gerektiğini' anlamakta zorlanıyor mu?" },
+                    { id: "as5", type: "scale", text: "Göz teması kurma ve vücut dilini kullanma becerisi?" },
+                    { id: "as6", type: "boolean", text: "Rutinlere aşırı bağlı mı? Beklenmedik plan değişiklikleri kriz yaratıyor mu?" },
+                    { id: "as7", type: "open", text: "Başkalarının duygularını anlama ve empati kurma konusundaki gözlemleriniz?" },
+                    { id: "as8", type: "boolean", text: "Duyusal aşırı yüklenme (kalabalık, gürültü) durumunda kaçınma davranışı var mı?" },
+                    { id: "as9", type: "boolean", text: "Ses tonu mekanik, vurgusuz veya yaşından daha akademik/kitabi mi?" },
+                    { id: "as10", type: "scale", text: "Grup oyunlarına dahil olma becerisi?" },
+                    { id: "as11", type: "boolean", text: "Sohbeti başlatma ve karşılık sürdürme konusunda zorluk yaşıyor mu?" }
+                ]
+            },
+            adhd: {
+                title: "DEHB Değerlendirme",
+                questions: [
+                    { id: "ad1", type: "scale", text: "Dikkatini bir işe (örn: ödev) verme süresi sınıfına göre nasıl? (1: Çok Kısa, 5: Normal)" },
+                    { id: "ad2", type: "boolean", text: "Sürekli hareket halinde mi? (Sanki bir motor takılmış gibi)" },
+                    { id: "ad3", type: "boolean", text: "Sırasını beklemekte veya dürtülerini kontrol etmekte zorlanıyor mu?" },
+                    { id: "ad4", type: "boolean", text: "Eşyalarını (kalem, ceket, kitap) sık sık kaybediyor mu?" },
+                    { id: "ad5", type: "scale", text: "Dış uyaranlarla dikkatinin dağılma sıklığı? (1: Çok Nadir, 5: Çok Sık)" },
+                    { id: "ad6", type: "boolean", text: "Sorulan soru tam bitmeden cevabı yapıştırıyor mu?" },
+                    { id: "ad7", type: "boolean", text: "Başkalarının sözünü kesme veya oyunlarına izinsiz dalma eğilimi var mı?" },
+                    { id: "ad8", type: "boolean", text: "Günlük aktivitelerde çok unutkan mı?" },
+                    { id: "ad9", type: "open", text: "Çocuğun odaklanmasını en çok bozan durumları belirtir misiniz?" },
+                    { id: "ad10", type: "scale", text: "Karmaşık görevleri organize etme (örn: çanta hazırlama) becerisi?" },
+                    { id: "ad11", type: "boolean", text: "Sakin ve sessizce oynamakta veya vakit geçirmekte zorlanıyor mu?" },
+                    { id: "ad12", type: "boolean", text: "Detaylara dikkat etmez mi veya okul ödevlerinde dikkatsizce hatalar yapar mı?" }
+                ]
+            }
         };
 
         let state = {
-            view: 'landing',
-            ageGroup: null,
+            view: 'landing', // landing, quiz, info, sending
+            trackKey: null,
             answers: {},
-            formData: {
-                name: '', phone: '', kvkk: false,
-                gender: '', exactAge: '', diagnosis: '', meds: '',
-                specificDiagnosis: '', otherDiagnosisDetail: '',
-                routine: '', sensitivity: '', biggestProblem: '', primaryGoal: '',
-                likes: [], otherLikeDetail: '', birthInfo: ''
-            }
+            childInfo: { name: '', age: '', parent: '', phone: '' },
+            kvkkAccepted: false,
+            isSubmitting: false
         };
 
         function render() {
             const app = document.getElementById('app');
             if (state.view === 'landing') renderLanding(app);
             else if (state.view === 'quiz') renderQuiz(app);
-            else if (state.view === 'details') renderDetails(app);
-            else if (state.view === 'success') renderSuccess(app);
+            else if (state.view === 'info') renderInfo(app);
+            else if (state.view === 'sending') renderSending(app);
         }
 
         function renderLanding(app) {
             app.innerHTML = `
-                <div class="min-h-screen flex items-center justify-center p-6 fade-in text-center">
+                <div class="min-h-screen p-6 flex flex-col items-center justify-center fade-in text-center">
                     <div class="max-w-4xl w-full space-y-12">
                         <div class="space-y-4">
-                            <span class="text-indigo-600 font-extrabold text-sm tracking-widest uppercase tracking-tight">Özel Dokunuş Eğitim Danışmanlık</span>
-                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 leading-tight">Gelişim Analiz <br/><span class="text-indigo-600">Sistemi</span></h1>
-                            <p class="text-slate-500 text-lg font-medium">Uzman destekli ön değerlendirme için yaş grubunu seçin.</p>
+                            <span class="text-indigo-600 font-extrabold text-sm tracking-widest uppercase bg-indigo-50 px-4 py-2 rounded-full italic">Özel Dokunuş Eğitim Danışmanlık</span>
+                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 leading-tight">Özel Dokunuş <br/><span class="text-indigo-600">Ön Değerlendirme</span></h1>
+                            <p class="text-slate-500 text-lg max-w-xl mx-auto font-medium">Uzman analizi için hazırlanan bilimsel tarama basamakları. Lütfen bir kategori seçin.</p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <button onclick="changeView('quiz', 'infant')" class="card p-8 hover:border-indigo-400 btn-active text-left"><h3 class="text-xl font-black text-slate-800">0-2 Yaş</h3></button>
-                            <button onclick="changeView('quiz', 'preschool')" class="card p-8 hover:border-indigo-400 btn-active text-left"><h3 class="text-xl font-black text-slate-800">3-6 Yaş</h3></button>
-                            <button onclick="changeView('quiz', 'primary')" class="card p-8 hover:border-indigo-400 btn-active text-left"><h3 class="text-xl font-black text-slate-800">7-12 Yaş</h3></button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                            ${Object.entries(TRACKS).map(([key, track]) => `
+                                <button onclick="selectTrack('${key}')" class="card p-8 group hover:border-indigo-500 transition-all btn-active border-2 border-transparent">
+                                    <h3 class="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">${track.title}</h3>
+                                    <p class="text-sm text-slate-400 mt-2 italic">Taramaya hemen başlamak için tıklayın.</p>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-start gap-3 text-left max-w-2xl mx-auto shadow-sm">
+                            <div class="text-amber-500 font-bold text-xl leading-none">⚠️</div>
+                            <p class="text-[11px] text-amber-700 font-medium leading-relaxed italic">
+                                <strong>ÖNEMLİ:</strong> Bu sistem bir ön değerlendirme aracıdır. Elde edilen veriler kesin bir tanı niteliği taşımaz.
+                            </p>
                         </div>
                     </div>
                 </div>`;
         }
 
         function renderQuiz(app) {
-            const qs = DATA[state.ageGroup];
-            const answeredCount = Object.keys(state.answers).length;
-            const progress = (answeredCount / qs.length) * 100;
-            
+            const track = TRACKS[state.trackKey];
+            const filteredQuestions = track.questions.filter(q => !q.condition || q.condition(state.answers));
+            const allAnswered = filteredQuestions.every(q => state.answers[q.id] !== undefined || q.type === 'open');
+
             app.innerHTML = `
                 <div class="min-h-screen p-4 md:p-8 flex flex-col items-center">
-                    <div class="max-w-2xl w-full sticky top-4 z-20 mb-8 card p-4 backdrop-blur-md bg-white/90">
-                        <div class="flex items-center justify-between mb-2">
-                            <button onclick="changeView('landing')" class="text-[10px] font-black uppercase text-slate-400 hover:text-indigo-600">Geri Dön</button>
-                            <span class="text-xs font-bold text-indigo-600">Soru ${answeredCount} / ${qs.length}</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div class="progress-bar bg-indigo-600 h-full" style="width: ${progress}%"></div>
-                        </div>
-                    </div>
-                    <div class="max-w-2xl w-full space-y-6 pb-40">
-                        ${qs.map((q, idx) => `
-                            <div id="q-${q.id}" class="card question-card p-8 ${state.answers[q.id] !== undefined ? 'bg-indigo-50/10' : ''}">
-                                <p class="text-lg font-bold text-slate-800 mb-6 leading-snug">${idx + 1}. ${q.text}</p>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <button onclick="handleAnswer('${q.id}', true, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === true ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">EVET</button>
-                                    <button onclick="handleAnswer('${q.id}', false, ${idx})" class="py-4 rounded-2xl font-black border-2 transition-all btn-active ${state.answers[q.id] === false ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}">HAYIR</button>
+                    <div class="max-w-2xl w-full mt-10 space-y-8 pb-40">
+                        <div class="card p-6 sticky top-6 z-50 flex items-center gap-6 backdrop-blur-md bg-white/90">
+                            <button onclick="state.view='landing'; render();" class="text-slate-400 text-xs font-black uppercase tracking-widest hover:text-red-500 transition-colors">&larr; Vazgeç</button>
+                            <div class="flex-1">
+                                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div class="progress-bar bg-indigo-600 h-full" style="width: ${(Object.keys(state.answers).length / filteredQuestions.length) * 100}%"></div>
                                 </div>
-                            </div>`).join('')}
-                    </div>
-                    <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
-                        <button id="nextBtn" ${answeredCount < qs.length ? 'disabled' : ''} onclick="changeView('details')" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-2xl disabled:opacity-20 btn-active transition-all">Bilgilere Geç</button>
-                    </div>
-                </div>`;
-        }
-
-        function renderDetails(app) {
-            let agePlaceholder = state.ageGroup === 'infant' ? "Örn: 18 Aylık" : "Örn: 9 Yaş";
-
-            app.innerHTML = `
-                <div class="min-h-screen p-4 md:p-8 flex flex-col items-center pb-20">
-                    <div class="max-w-2xl w-full space-y-8">
-                        <button onclick="changeView('quiz')" class="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-xs font-bold text-slate-500 btn-active shadow-sm flex items-center gap-2"><span>&larr;</span> Sorulara Dön</button>
-                        
-                        <div class="card p-8 space-y-6">
-                            <h2 class="text-2xl font-black text-center text-indigo-900 border-b pb-4">Genel Profil & Öykü</h2>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <div><label class="text-[10px] font-black text-slate-400 uppercase required-label">Cinsiyet</label>
-                                <select onchange="updateForm('gender', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border">
-                                    <option value="">Seçiniz</option><option value="Erkek" ${state.formData.gender === 'Erkek' ? 'selected' : ''}>Erkek</option><option value="Kız" ${state.formData.gender === 'Kız' ? 'selected' : ''}>Kız</option>
-                                </select></div>
-                                <div><label class="text-[10px] font-black text-slate-400 uppercase required-label">Tam Yaşı</label>
-                                <input type="text" placeholder="${agePlaceholder}" value="${state.formData.exactAge}" oninput="updateForm('exactAge', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border"></div>
                             </div>
+                            <span class="text-indigo-600 font-bold text-xs uppercase tracking-widest">Soru ${Object.keys(state.answers).length + 1}</span>
+                        </div>
 
-                            <label class="block">
-                                <span class="text-[10px] font-black text-slate-400 uppercase required-label">Gelişimsel tanı veya uzman takibi var mı?</span>
-                                <select onchange="updateForm('diagnosis', this.value)" class="w-full p-3 bg-slate-50 rounded-xl outline-none mt-1 border">
-                                    <option value="">Seçiniz</option><option value="Hayır" ${state.formData.diagnosis === 'Hayır' ? 'selected' : ''}>Hayır</option><option value="Evet" ${state.formData.diagnosis === 'Evet' ? 'selected' : ''}>Evet</option>
-                                </select>
-                            </label>
+                        <div class="text-center">
+                             <h2 class="text-lg font-bold text-indigo-900 uppercase tracking-tighter opacity-50">${track.title}</h2>
+                        </div>
 
-                            ${state.formData.diagnosis === 'Evet' ? `
-                            <div class="animate-in fade-in slide-in-from-top-2 duration-300 space-y-4 bg-indigo-50/30 p-4 rounded-2xl border border-indigo-100">
-                                <div><label class="text-[10px] font-black text-indigo-600 uppercase required-label">Tanı Detayı</label>
-                                <select onchange="updateForm('specificDiagnosis', this.value)" class="w-full p-3 bg-white rounded-xl outline-none mt-1 border font-bold text-indigo-600">
-                                    <option value="">Seçiniz</option>
-                                    <option value="Atipik Otizm" ${state.formData.specificDiagnosis === 'Atipik Otizm' ? 'selected' : ''}>Atipik Otizm</option>
-                                    <option value="DEHB" ${state.formData.specificDiagnosis === 'DEHB' ? 'selected' : ''}>DEHB</option>
-                                    <option value="Özel Öğrenme Güçlüğü" ${state.formData.specificDiagnosis === 'Özel Öğrenme Güçlüğü' ? 'selected' : ''}>Özel Öğrenme Güçlüğü</option>
-                                    <option value="Diğer" ${state.formData.specificDiagnosis === 'Diğer' ? 'selected' : ''}>Diğer</option>
-                                </select></div>
-                                ${state.formData.specificDiagnosis === 'Diğer' ? `
-                                <input type="text" placeholder="Lütfen tanıyı belirtiniz" value="${state.formData.otherDiagnosisDetail}" oninput="updateForm('otherDiagnosisDetail', this.value)" class="w-full p-3 bg-white rounded-xl outline-none border font-medium">` : ''}
-                            </div>` : ''}
-
-                            <textarea oninput="updateForm('routine', this.value)" placeholder="Günlük rutinler, duyusal hassasiyetler, öfke durumları..." class="w-full p-4 bg-slate-50 rounded-xl outline-none h-24 text-sm font-medium border">${state.formData.routine}</textarea>
-
-                            <div class="pt-6 border-t space-y-4">
-                                <div><label class="text-[10px] font-black text-slate-400 uppercase required-label ml-1">Veli Ad Soyad</label>
-                                <input type="text" placeholder="Ad Soyad" value="${state.formData.name}" oninput="updateForm('name', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold border focus:border-indigo-500"></div>
-                                <div><label class="text-[10px] font-black text-slate-400 uppercase required-label ml-1">Veli Telefon Numarası</label>
-                                <input type="tel" maxlength="11" placeholder="05xx xxx xx xx" value="${state.formData.phone}" oninput="updateForm('phone', this.value)" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold border focus:border-indigo-500"></div>
-                                <label class="flex items-start gap-3 p-2 cursor-pointer transition-all">
-                                    <input type="checkbox" ${state.formData.kvkk ? 'checked' : ''} onchange="updateForm('kvkk', this.checked); validateForm();" class="mt-1 w-5 h-5 accent-indigo-600">
-                                    <span class="text-[11px] text-slate-500 font-medium italic">KVKK metnini okudum, verilerimin uzman değerlendirmesi amacıyla işlenmesini kabul ediyorum.</span>
-                                </label>
+                        ${filteredQuestions.map((q, idx) => `
+                            <div id="q-${q.id}" class="card p-8 space-y-6 question-card fade-in" style="opacity: ${state.answers[q.id] === undefined ? '1' : '0.4'}">
+                                <h2 class="text-xl font-black text-slate-800 leading-snug tracking-tight">${idx + 1}. ${q.text}</h2>
+                                <div class="space-y-3">
+                                    ${renderQuestionInput(q, idx, filteredQuestions)}
+                                </div>
                             </div>
+                        `).join('')}
 
-                            <button id="finalSubmitBtn" disabled onclick="submitData()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl btn-active disabled:opacity-30 transition-all">Analizi Tamamla ve Gönder</button>
+                        <div class="fixed bottom-8 left-4 right-4 max-w-2xl mx-auto">
+                            <button onclick="finishQuiz()" id="submitBtn" ${!allAnswered ? 'disabled' : ''} class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-200 btn-active disabled:opacity-20 transition-all">
+                                Soruları Tamamladım, Bilgilerime Geç
+                            </button>
                         </div>
                     </div>
                 </div>`;
-            validateForm();
         }
 
-        function renderSuccess(app) {
-            app.innerHTML = `
-                <div class="min-h-screen flex items-center justify-center p-6 text-center fade-in">
-                    <div class="max-w-md w-full card p-12 space-y-8 shadow-2xl">
-                        <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto animate-bounce shadow-inner">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        function renderQuestionInput(q, idx, list) {
+            const val = state.answers[q.id];
+            const nextQ = list[idx + 1];
+
+            if (q.type === 'boolean') {
+                return `
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="setAns('${q.id}', true, '${nextQ ? nextQ.id : 'submit'}')" class="option-btn ${val === true ? 'selected shadow-lg' : ''}">EVET</button>
+                        <button onclick="setAns('${q.id}', false, '${nextQ ? nextQ.id : 'submit'}')" class="option-btn ${val === false ? 'selected shadow-lg' : ''}">HAYIR</button>
+                    </div>`;
+            }
+            if (q.type === 'scale') {
+                return `
+                    <div class="grid grid-cols-5 gap-2">
+                        ${[1, 2, 3, 4, 5].map(n => `
+                            <button onclick="setAns('${q.id}', ${n}, '${nextQ ? nextQ.id : 'submit'}')" class="option-btn ${val === n ? 'selected shadow-lg' : ''}">${n}</button>
+                        `).join('')}
+                        <div class="col-span-5 flex justify-between text-[10px] font-black text-slate-400 uppercase mt-2 tracking-tighter">
+                            <span>Hiç / Nadir</span>
+                            <span>Çok Sık</span>
                         </div>
-                        <h2 class="text-3xl font-black text-slate-900 leading-tight">Başvurunuz Alındı!</h2>
-                        <p class="text-slate-600 text-sm font-medium italic">Veli bilgileriniz ve test yanıtlarınız sisteme kaydedildi. Raporunuz hazırlanıyor.</p>
-                    </div>
-                </div>`;
-            setTimeout(() => window.open('https://ozeldokunus.com', '_top'), 5000);
-        }
-
-        function changeView(view, group = null) { state.view = view; if (group) state.ageGroup = group; render(); window.scrollTo(0, 0); }
-        
-        function handleAnswer(id, val, idx) { 
-            state.answers[id] = val; render(); 
-            const questions = DATA[state.ageGroup];
-            if (idx < questions.length - 1) {
-                setTimeout(() => {
-                    const el = document.getElementById(`q-${questions[idx + 1].id}`);
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 50);
+                    </div>`;
+            }
+            if (q.type === 'choice') {
+                return `
+                    <div class="grid grid-cols-3 gap-2">
+                        ${q.options.map(opt => `
+                            <button onclick="setAns('${q.id}', '${opt}', '${nextQ ? nextQ.id : 'submit'}')" class="option-btn text-xs ${val === opt ? 'selected shadow-lg' : ''}">${opt}</button>
+                        `).join('')}
+                    </div>`;
+            }
+            if (q.type === 'open') {
+                return `<textarea placeholder="Varsa eklemek istediğiniz notlar..." onblur="setAns('${q.id}', this.value)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border focus:border-indigo-500 h-24 resize-none font-medium">${val || ''}</textarea>`;
             }
         }
 
-        function updateForm(key, val) { state.formData[key] = (key === 'phone') ? val.replace(/\D/g, '') : val; if (key === 'diagnosis' || key === 'specificDiagnosis') render(); validateForm(); }
+        function renderInfo(app) {
+            app.innerHTML = `
+                <div class="min-h-screen p-6 flex flex-col items-center justify-center fade-in">
+                    <div class="max-w-md w-full card p-8 md:p-10 space-y-6">
+                        <div class="text-center space-y-2">
+                            <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tight">Son Adım: Bilgileriniz</h2>
+                            <p class="text-sm text-slate-400 font-medium">Analizin tamamlanması için lütfen bilgilerinizi doldurun.</p>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Veli Ad Soyad *</label>
+                                <input type="text" id="parentName" oninput="validateInfoForm()" placeholder="Adınız Soyadınız" class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500 font-bold transition-all">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">İletişim Numarası * (05...)</label>
+                                <input type="tel" id="parentPhone" 
+                                    maxlength="11"
+                                    oninput="this.value = this.value.replace(/\\D/g, ''); validateInfoForm()" 
+                                    placeholder="05XXXXXXXXX" 
+                                    class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500 font-bold transition-all">
+                                <p id="phoneError" class="text-[10px] text-red-500 font-bold mt-1 hidden">Numara 05 ile başlamalı ve 11 haneli olmalıdır.</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Çocuğun Adı (Opsiyonel)</label>
+                                    <input type="text" id="childName" placeholder="Adı" class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500 font-bold transition-all">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Çocuğun Yaşı</label>
+                                    <input type="number" id="childAge" placeholder="Yaş" class="w-full p-4 bg-slate-50 rounded-xl outline-none border focus:border-indigo-500 font-bold transition-all">
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase ml-1">KVKK Onayı *</label>
+                                <div class="kvkk-box">
+                                    <strong>KVKK Aydınlatma Metni:</strong><br><br>
+                                    Özel Dokunuş Eğitim Danışmanlık olarak; paylaştığınız kişisel veriler sadece analiz raporunun oluşturulması ve sizinle iletişime geçilmesi amacıyla kullanılır. Üçüncü şahıslarla paylaşılmaz. "Gönder" butonuna basarak bu süreci kabul etmiş sayılırsınız.
+                                </div>
+                                <label class="flex items-start gap-3 p-2 cursor-pointer group">
+                                    <input type="checkbox" id="kvkkCheck" onchange="toggleKvkk(this.checked)" class="mt-1 w-5 h-5 accent-indigo-600 rounded">
+                                    <span class="text-xs text-slate-500 font-bold group-hover:text-indigo-600 transition-colors">Okudum, verilerimin işlenmesini onaylıyorum.</span>
+                                </label>
+                            </div>
 
-        function validateForm() {
-            const btn = document.getElementById('finalSubmitBtn');
-            if (!btn) return;
-            const valid = state.formData.name.trim().length >= 3 && /^05\d{9}$/.test(state.formData.phone) && state.formData.kvkk;
-            btn.disabled = !valid;
+                            <button id="finalSubmitBtn" disabled onclick="saveAndSubmit()" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl btn-active disabled:opacity-20 transition-all">Analizi Tamamla ve Gönder</button>
+                        </div>
+                    </div>
+                </div>`;
         }
 
-        async function submitData() {
-            const btn = document.getElementById('finalSubmitBtn');
-            btn.innerText = "Gönderiliyor..."; btn.disabled = true;
+        function renderSending(app) {
+            app.innerHTML = `
+                <div class="min-h-screen p-6 flex flex-col items-center justify-center text-center space-y-6 fade-in">
+                    <div class="w-20 h-20 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Veriler İletiliyor</h2>
+                    <p class="text-slate-500 font-medium italic">Uzmanımız Serhat Esen kısa sürede sizinle iletişime geçecektir. Yönlendiriliyorsunuz...</p>
+                </div>`;
+        }
 
-            const results = Object.entries(state.answers).map(([id, val]) => {
-                const q = Object.values(DATA).flat().find(q => q.id === id);
-                return `${q ? q.text : id}: ${val ? 'EVET' : 'HAYIR'}`;
+        // --- CORE LOGIC ---
+
+        function selectTrack(key) { 
+            state.trackKey = key; 
+            state.view = 'quiz'; 
+            render(); 
+            window.scrollTo(0,0);
+        }
+
+        function finishQuiz() {
+            state.view = 'info';
+            render();
+            window.scrollTo(0,0);
+        }
+
+        function toggleKvkk(checked) {
+            state.kvkkAccepted = checked;
+            validateInfoForm();
+        }
+
+        function validateInfoForm() {
+            const pName = document.getElementById('parentName')?.value || "";
+            const pPhone = document.getElementById('parentPhone')?.value || "";
+            const errorEl = document.getElementById('phoneError');
+            
+            const isNameOk = pName.trim().length >= 3;
+            
+            // Telefon validasyonu: Rakamlardan oluşmalı, 05 ile başlamalı ve 11 hane olmalı
+            const cleanPhone = pPhone.replace(/\D/g, '');
+            const isPhoneValid = /^05\d{9}$/.test(cleanPhone);
+            
+            if (pPhone.length > 0 && !isPhoneValid) {
+                errorEl?.classList.remove('hidden');
+            } else {
+                errorEl?.classList.add('hidden');
+            }
+            
+            const btn = document.getElementById('finalSubmitBtn');
+            if(btn) btn.disabled = !(isNameOk && isPhoneValid && state.kvkkAccepted);
+        }
+
+        function setAns(id, val, nextId) {
+            state.answers[id] = val;
+            render();
+            if (nextId && nextId !== 'submit') {
+                setTimeout(() => {
+                    const el = document.getElementById('q-' + nextId);
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            } else if (nextId === 'submit') {
+                 setTimeout(() => {
+                    const btn = document.getElementById('submitBtn');
+                    if(btn) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 150);
+            }
+        }
+
+        async function saveAndSubmit() {
+            if (state.isSubmitting) return;
+            
+            state.childInfo = {
+                parent: document.getElementById('parentName').value,
+                phone: document.getElementById('parentPhone').value,
+                name: document.getElementById('childName').value || "Belirtilmedi",
+                age: document.getElementById('childAge').value || "Belirtilmedi"
+            };
+
+            state.isSubmitting = true;
+            state.view = 'sending';
+            render();
+
+            const track = TRACKS[state.trackKey];
+            const testResults = Object.entries(state.answers).map(([id, val]) => {
+                const q = track.questions.find(x => x.id === id);
+                return `${q ? q.text : id}: ${val}`;
             }).join('\n');
 
-            const payload = { 
-                ...state.formData, 
-                ageGroup: state.ageGroup, 
-                testResults: results, 
-                submittedAt: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }) 
+            const payload = {
+                ...state.childInfo,
+                track: track.title,
+                results: testResults,
+                submittedAt: new Date().toLocaleString('tr-TR')
             };
-            
-            // KESİN GÖNDERİM MANTIĞI: Her iki servisi aynı anda tetikle
-            Promise.allSettled([
-                fetch(formspreeUrl, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, 
-                    body: JSON.stringify(payload) 
-                }),
-                fetch(makeWebhookUrl, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
-                })
-            ]).finally(() => {
-                changeView('success');
-            });
+
+            try {
+                await fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                setTimeout(() => { window.location.href = 'https://ozeldokunus.com'; }, 1500);
+            } catch (e) {
+                setTimeout(() => { window.location.href = 'https://ozeldokunus.com'; }, 1500);
+            }
         }
 
         render();
