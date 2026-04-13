@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Özel Dokunuş - Gelişim Analiz Sistemi</title>
+    <!-- Tailwind CSS ve Fontlar -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- React ve Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -25,6 +27,7 @@
         (() => {
             const { useState, Fragment } = React;
 
+            // --- İKONLAR ---
             const Icons = {
                 ChevronRight: ({ size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
                 User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
@@ -46,6 +49,7 @@
                 Loader2: ({ size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin-custom"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
             };
 
+            // --- TEST VERİLERİ ---
             const DATA = {
                 autism_early: {
                     title: "Erken Çocukluk Gelişim Haritası", category: "Otizm Destek Eğitimi", age: "0-3 Yaş", icon: <Icons.Baby />, color: "indigo",
@@ -130,40 +134,36 @@
                     const testResultsText = track.questions.map(q => {
                         const ans = answers[q.id];
                         const label = typeof ans === 'boolean' ? (ans ? 'EVET' : 'HAYIR') : ans;
-                        return `${q.text}: ${label}`;
+                        return `${q.text} -> ${label}`;
                     }).join('\n');
 
                     const payload = {
-                        name: formData.name,
-                        phone: formData.phone,
-                        gender: formData.gender,
-                        exactAge: formData.exactAge,
-                        kvkk: formData.kvkk ? "Onaylandı" : "Onaylanmadı",
-                        whatsapp: formData.whatsapp ? "İzin Verildi" : "İzin Verilmedi",
-                        trackTitle: track.title,
-                        testResults: testResultsText,
-                        quickStrengths: analysisSummary.strengths.join(', '),
-                        quickNeeds: analysisSummary.needs.join(', '),
-                        submittedAt: new Date().toLocaleString('tr-TR')
+                        tarih: new Date().toLocaleString('tr-TR'),
+                        veli_ad_soyad: formData.name,
+                        telefon: formData.phone,
+                        cocuk_cinsiyet: formData.gender,
+                        cocuk_yas: formData.exactAge,
+                        test_kategorisi: track.title,
+                        guclu_yanlar: analysisSummary.strengths.join(', '),
+                        destek_alanlari: analysisSummary.needs.join(', '),
+                        test_yanitlari: testResultsText,
+                        kvkk_onay: formData.kvkk ? "ONAYLANDI" : "ONAYLANMADI",
+                        whatsapp_izni: formData.whatsapp ? "EVET" : "HAYIR"
                     };
 
                     try {
-                        await Promise.allSettled([
-                            fetch('https://formspree.io/f/mvzdokdv', { 
-                                method: 'POST', 
-                                headers: { 'Content-Type': 'application/json' }, 
-                                body: JSON.stringify(payload) 
-                            }),
-                            fetch('https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz', { 
-                                method: 'POST', 
-                                headers: { 'Content-Type': 'application/json' }, 
-                                body: JSON.stringify(payload) 
-                            })
-                        ]);
+                        // Veriler doğrudan formspree adresine gider
+                        await fetch('https://formspree.io/f/mgorekwk', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify(payload) 
+                        });
                         
                         setView('success');
-                        const waMsg = encodeURIComponent(`Merhaba Serhat Bey, Özel Dokunuş Ön Değerlendirme Testini tamamladım. Detaylı analiz raporu ve randevu için görüşmek istiyorum.\n\nVeli: ${formData.name}\nÇocuk: ${formData.gender} - ${formData.exactAge}`);
-                        setTimeout(() => { window.location.href = `https://wa.me/905324997374?text=${waMsg}`; }, 3500);
+                        const waMsg = encodeURIComponent(`Merhaba Serhat Bey, Özel Dokunuş gelişim testini tamamladım. Raporun e-postanıza ulaştığını teyit etmek ve detaylar hakkında görüşmek istiyorum.\n\nVeli: ${formData.name}`);
+                        setTimeout(() => { 
+                            window.location.href = `https://wa.me/905324997374?text=${waMsg}`; 
+                        }, 3500);
 
                     } catch (e) {
                         setView('success');
@@ -171,6 +171,8 @@
                         setLoading(false);
                     }
                 };
+
+                // --- UI BİLEŞENLERİ ---
 
                 if (view === 'landing') return (
                     <div className="min-h-screen bg-white fade-in">
@@ -185,11 +187,11 @@
                                     <span className="text-indigo-400">Gelişim Bir Yolculuktur.</span>
                                 </h1>
                                 <p className="text-indigo-100 text-lg md:text-2xl font-medium max-w-2xl mx-auto opacity-90 italic">
-                                    Çocuğunuzun gelişimsel potansiyelini keşfedin. Bilimsel metotlarla hazırlanan analizimizle en doğru adımları birlikte planlayalım.
+                                    Çocuğunuzun potansiyelini bilimsel yöntemlerle analiz ediyor, raporunuzu doğrudan uzmanımıza ulaştırıyoruz.
                                 </p>
                                 <div className="pt-8">
                                     <button onClick={() => setView('selection')} className="bg-white text-indigo-900 px-12 py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl hover:bg-indigo-50 transition-all flex items-center gap-4 mx-auto active:scale-95 group">
-                                        Ücretsiz Ön Değerlendirmeyi Başlat <Icons.ChevronRight size={32} />
+                                        Ücretsiz Analizi Başlat <Icons.ChevronRight size={32} />
                                     </button>
                                 </div>
                             </div>
@@ -198,17 +200,17 @@
                             <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all">
                                 <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><Icons.Heart fill="currentColor" /></div>
                                 <h3 className="font-black text-3xl text-slate-800 pt-4">Bireysel Özel Ders</h3>
-                                <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Akademik engellere karşı kişiye özel yaklaşımlar.</p>
+                                <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Öğrenme güçlüğü ve akademik engellere karşı kişiye özel yaklaşımlar.</p>
                             </div>
                             <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all">
                                 <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><Icons.Star fill="currentColor" /></div>
                                 <h3 className="font-black text-3xl text-slate-800 pt-4">Aile Danışmanlığı</h3>
-                                <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Ebeveynler için sürdürülebilir gelişim stratejileri.</p>
+                                <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Ebeveynler için sürdürülebilir gelişim ve çözüm stratejileri.</p>
                             </div>
                             <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all">
                                 <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><Icons.Map size={32} /></div>
                                 <h3 className="font-black text-3xl text-slate-800 pt-4">Gelişim Planı</h3>
-                                <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Eşsiz hızına özel bilimsel yol haritaları.</p>
+                                <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Her çocuğun eşsiz gelişim hızına özel uzman yol haritaları.</p>
                             </div>
                         </section>
                     </div>
@@ -253,18 +255,10 @@
                                     {track.questions.map((q, idx) => (
                                         <div key={q.id} id={`q-${q.id}`} className={`bg-white p-12 rounded-[4rem] shadow-2xl border-2 transition-all duration-500 ${answers[q.id] !== undefined ? 'opacity-30 border-transparent scale-95' : 'border-indigo-100'}`}>
                                             <p className="font-black text-slate-800 text-2xl md:text-3xl leading-tight mb-10">{idx + 1}. {q.text}</p>
-                                            {q.type === 'choice' ? (
-                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                    {q.options.map(opt => (
-                                                        <button key={opt} onClick={() => handleAnswer(q.id, opt, track.questions[idx+1]?.id)} className={`py-6 rounded-3xl font-black text-base transition-all ${answers[q.id] === opt ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>{opt}</button>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="flex gap-5">
-                                                    <button onClick={() => handleAnswer(q.id, true, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === true ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>EVET</button>
-                                                    <button onClick={() => handleAnswer(q.id, false, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === false ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>HAYIR</button>
-                                                </div>
-                                            )}
+                                            <div className="flex gap-5">
+                                                <button onClick={() => handleAnswer(q.id, true, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === true ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>EVET</button>
+                                                <button onClick={() => handleAnswer(q.id, false, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === false ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>HAYIR</button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -293,6 +287,7 @@
                                         <ul className="space-y-2">{analysisSummary.needs.map(n => <li key={n} className="text-slate-700 text-sm font-bold flex items-center gap-3"><div className="w-2 h-2 bg-rose-400 rounded-full"></div> {n}</li>)}</ul>
                                     </div>
                                 </div>
+                                <p className="text-xs text-slate-500 font-bold italic border-t pt-4">Kapsamlı raporun uzmanımıza iletilmesi için bilgileri doldurun.</p>
                             </div>
                             <div className="space-y-5">
                                 <div className="grid grid-cols-2 gap-5">
@@ -303,11 +298,11 @@
                                 <input placeholder="Telefon (05XX...)" maxLength={11} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} className="w-full p-6 bg-slate-50 rounded-[2rem] font-black text-2xl border-none focus:ring-4 ring-indigo-100" />
                                 <label className="flex items-start gap-4 p-5 bg-indigo-50/50 rounded-[2.5rem] cursor-pointer">
                                     <input type="checkbox" onChange={e => setFormData({...formData, kvkk: e.target.checked})} className="mt-1 w-6 h-6 rounded" />
-                                    <span className="text-xs text-indigo-900 font-black">KVKK kapsamında verilerimin işlenmesini kabul ediyorum.</span>
+                                    <span className="text-xs text-indigo-900 font-black">Analiz raporunun e-posta ile tarafıma iletilmesini ve KVKK kapsamında verilerimin incelenmesini kabul ediyorum.</span>
                                 </label>
                             </div>
                             <button disabled={!formData.name || formData.phone.length !== 11 || !formData.kvkk || loading} onClick={handleFinalSubmit} className="w-full bg-indigo-600 text-white py-7 rounded-[3rem] font-black text-2xl shadow-2xl flex items-center justify-center gap-4 active:scale-95 disabled:opacity-30 border-b-8 border-indigo-800">
-                                {loading ? <Icons.Loader2 size={32} /> : <Fragment><Icons.Send /> Raporumu Gönder</Fragment>}
+                                {loading ? <Icons.Loader2 size={32} /> : <Fragment><Icons.Send /> Raporu Uzmana Gönder</Fragment>}
                             </button>
                         </div>
                     </div>
@@ -317,12 +312,12 @@
                     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center space-y-14 fade-in">
                         <div className="w-44 h-44 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center shadow-inner animate-bounce border-8 border-white ring-[12px] ring-emerald-50"><Icons.CheckCircle2 /></div>
                         <div className="space-y-6">
-                            <h2 className="text-5xl font-black text-slate-900 italic leading-tight">Tebrikler! İlk Adımı Attınız.</h2>
-                            <p className="text-2xl text-slate-500 font-medium max-w-3xl leading-relaxed">Verileriniz güvenle uzmanlarımıza ulaştı. Detaylı analiziniz için şimdi otomatik olarak WhatsApp'a yönlendiriliyorsunuz.</p>
+                            <h2 className="text-5xl font-black text-slate-900 italic leading-tight">Tebrikler!</h2>
+                            <p className="text-2xl text-slate-500 font-medium max-w-3xl leading-relaxed">Verileriniz e-posta yoluyla uzmanımıza iletildi. Detaylı analiz raporu hazırlanırken hemen WhatsApp üzerinden tanışabiliriz.</p>
                         </div>
                         <div className="flex flex-col gap-6 w-full max-w-lg">
                             <a href="https://wa.me/905324997374" className="bg-emerald-500 text-white py-8 rounded-[3rem] font-black text-3xl flex items-center justify-center gap-5 shadow-2xl border-b-[10px] border-emerald-700 animate-pulse">
-                                <Icons.MessageCircle size={40} /> WhatsApp'a Geç
+                                <Icons.MessageCircle size={40} /> Uzmanla Hemen Görüş
                             </a>
                             <button onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 text-indigo-600 font-black text-lg pt-6 group transition-all"><Icons.Home /> Anasayfaya gitmek için tıklayınız</button>
                         </div>
