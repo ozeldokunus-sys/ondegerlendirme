@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronRight, User, Phone, ClipboardList, AlertCircle, Baby, GraduationCap, 
-  Activity, Zap, MessageCircle, Heart, Star, Map, ShieldCheck, Send, Loader2, CheckCircle2, Info, ThumbsUp, AlertTriangle, Home
+  Activity, Zap, MessageCircle, Heart, Star, Map, ShieldCheck, Send, Loader2, 
+  CheckCircle2, Info, ThumbsUp, AlertTriangle, Home
 } from 'lucide-react';
 
 const DATA = {
@@ -31,7 +32,7 @@ const DATA = {
       { id: "ld_2", text: "b-d, m-n, p-q gibi benzer harfleri birbirine karıştırıyor mu?", riskIf: true, label: "Harf Farkındalığı" },
       { id: "ld_3", text: "Okuma hızı sınıf ortalamasına göre belirgin şekilde yavaş mı?", riskIf: true, label: "İşleme Hızı" },
       { id: "ld_4", text: "Yazı yazarken harf, hece veya kelime eksiltiyor mu?", riskIf: true, label: "Yazılı Anlatım" },
-      { id: "ld_5", text: "Basit matematik işlemlerinde hala parmak saymaya devam ediyor mu?", riskIf: true, label: "Aritmetik Muhakeme" },
+      { id: "ld_5", text: "Basit matematik işlemlerinde hala parmak saymaya devam ediyor mu?", riskIf: true, label: "Matematiksel Mantık" },
       { id: "ld_6", text: "Sağ-sol ayrımı yapmakta veya ayakkabı bağlamakta zorlanıyor mu?", riskIf: true, label: "Yönelim Becerisi" }
     ]
   },
@@ -42,7 +43,7 @@ const DATA = {
     icon: <Activity size={40} />,
     color: "rose",
     questions: [
-      { id: "as_1", text: "Şakaları, mecazları veya deyimleri anlamakta güçlük çekiyor mu?", riskIf: true, label: "Pragmatik Dil" },
+      { id: "as_1", text: "Şakaları, mecazları veya deyimleri anlamakta güçlük çekiyor mu?", riskIf: true, label: "Pragmatik İletişim" },
       { id: "as_2", text: "Akranlarıyla arkadaşlık kurma ve sürdürme konusunda zorlanıyor mu?", riskIf: true, label: "Sosyal Etkileşim" },
       { id: "as_3", text: "Hep aynı kısıtlı ilgi alanları hakkında tek taraflı mı konuşuyor?", riskIf: true, label: "İlgi Esnekliği" },
       { id: "as_4", text: "Rutinlere aşırı bağlı mı? Beklenmedik plan değişiklikleri kriz yaratıyor mu?", riskIf: true, label: "Adaptasyon" },
@@ -58,7 +59,7 @@ const DATA = {
     color: "emerald",
     questions: [
       { id: "ad_1", text: "Dikkatini bir işe verme süresi sınıfına göre çok mu kısa?", riskIf: true, label: "Sürdürülebilir Odak" },
-      { id: "ad_2", text: "Sürekli hareket halinde mi? (Sanki bir motor takılmış gibi)", riskIf: true, label: "Dürtüsel Hareket" },
+      { id: "ad_2", text: "Sürekli hareket halinde mi? (Sanki bir motor takılmış gibi)", riskIf: true, label: "Hiperaktivite" },
       { id: "ad_3", text: "Sırasını beklemekte veya dürtülerini kontrol etmekte zorlanıyor mu?", riskIf: true, label: "Öz Denetim" },
       { id: "ad_4", text: "Eşyalarını (kalem, ceket, kitap) sık sık kaybediyor mu?", riskIf: true, label: "Organizasyon" },
       { id: "ad_5", text: "Dış uyaranlarla dikkati çok kolay dağılıyor mu?", riskIf: true, label: "Dikkat Dağılımı" },
@@ -72,7 +73,7 @@ export default function App() {
   const [trackKey, setTrackKey] = useState(null);
   const [answers, setAnswers] = useState({});
   const [formData, setFormData] = useState({
-    name: '', phone: '', gender: '', exactAge: '', note: '', kvkk: false, whatsapp: true
+    name: '', phone: '', gender: '', exactAge: '', kvkk: false, whatsapp: true
   });
   const [loading, setLoading] = useState(false);
   const [analysisSummary, setAnalysisSummary] = useState({ strengths: [], needs: [] });
@@ -123,18 +124,20 @@ export default function App() {
     };
 
     try {
-      await fetch('https://formspree.io/f/meevjkdk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      });
-      fetch('https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      });
+      await Promise.allSettled([
+        fetch('https://formspree.io/f/meevjkdk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }),
+        fetch('https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        })
+      ]);
       setView('success');
     } catch (e) {
       setView('success');
@@ -145,10 +148,9 @@ export default function App() {
 
   if (view === 'landing') return (
     <div className="min-h-screen bg-white">
-      {/* KARŞILAMA EKRANI (HERO) */}
       <section className="bg-indigo-900 text-white px-6 py-24 md:py-36 text-center space-y-10 rounded-b-[4rem] md:rounded-b-[6rem] shadow-2xl relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent)]"></div>
-        <div className="max-w-4xl mx-auto space-y-8 relative z-10">
+        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-top-6 duration-700 relative z-10">
           <div className="flex items-center justify-center gap-2 mb-2">
              <ShieldCheck size={28} className="text-indigo-400" />
              <span className="text-sm font-black uppercase tracking-[0.3em] text-indigo-300">Özel Dokunuş Eğitim Danışmanlık</span>
@@ -162,30 +164,27 @@ export default function App() {
           </p>
           <div className="pt-8">
             <button onClick={() => setView('selection')} className="bg-white text-indigo-900 px-12 py-7 rounded-[2.5rem] font-black text-2xl shadow-2xl hover:bg-indigo-50 transition-all flex items-center gap-4 mx-auto active:scale-95 group">
-              Ücretsiz Ön Değerlendirmeyi Başlat <ChevronRight size={32} />
+              Ücretsiz Ön Değerlendirmeyi Başlat <ChevronRight size={32} className="group-hover:translate-x-2 transition-transform" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* HİZMET ÖZETLERİ */}
-      <section className="px-6 py-24 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
-          <div className="space-y-4 p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group">
-            <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center mx-auto md:mx-0 group-hover:rotate-12 transition-transform shadow-sm"><Heart size={32} fill="currentColor" /></div>
-            <h3 className="font-black text-3xl text-slate-800 pt-4">Bireysel Özel Ders</h3>
-            <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Öğrenme güçlüğü ve akademik engellere karşı kişiye özel yaklaşımlar.</p>
-          </div>
-          <div className="space-y-4 p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group">
-            <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto md:mx-0 group-hover:rotate-12 transition-transform shadow-sm"><Star size={32} fill="currentColor" /></div>
-            <h3 className="font-black text-3xl text-slate-800 pt-4">Aile Danışmanlığı</h3>
-            <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Ebeveynler için pratik çözümler ve sürdürülebilir gelişim stratejileri.</p>
-          </div>
-          <div className="space-y-4 p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group">
-            <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto md:mx-0 group-hover:rotate-12 transition-transform shadow-sm"><Map size={32} /></div>
-            <h3 className="font-black text-3xl text-slate-800 pt-4">Gelişim Planı</h3>
-            <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Her çocuğun eşsiz gelişim hızına özel bilimsel yol haritaları.</p>
-          </div>
+      <section className="px-6 py-24 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+        <div className="space-y-4 p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group">
+          <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center mx-auto md:mx-0 group-hover:rotate-12 transition-transform shadow-sm"><Heart size={32} fill="currentColor" /></div>
+          <h3 className="font-black text-3xl text-slate-800 pt-4">Bireysel Özel Ders</h3>
+          <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Öğrenme güçlüğü ve akademik engellere karşı kişiye özel yaklaşımlar.</p>
+        </div>
+        <div className="space-y-4 p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group">
+          <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto md:mx-0 group-hover:rotate-12 transition-transform shadow-sm"><Star size={32} fill="currentColor" /></div>
+          <h3 className="font-black text-3xl text-slate-800 pt-4">Aile Danışmanlığı</h3>
+          <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Ebeveynler için pratik çözümler ve sürdürülebilir gelişim stratejileri.</p>
+        </div>
+        <div className="space-y-4 p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group">
+          <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto md:mx-0 group-hover:rotate-12 transition-transform shadow-sm"><Map size={32} /></div>
+          <h3 className="font-black text-3xl text-slate-800 pt-4">Gelişim Planı</h3>
+          <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Her çocuğun eşsiz gelişim hızına özel bilimsel yol haritaları.</p>
         </div>
       </section>
     </div>
@@ -220,9 +219,6 @@ export default function App() {
             </button>
           ))}
         </div>
-        <div className="bg-amber-50 py-6 px-10 rounded-[2.5rem] border border-amber-200 inline-flex items-center gap-3 text-amber-700 font-bold">
-           <AlertCircle size={24} /> Bu analiz yüzeysel bir taramadır, tıbbi tanı niteliği taşımaz.
-        </div>
       </div>
     </div>
   );
@@ -230,7 +226,6 @@ export default function App() {
   if (view === 'quiz') {
     const track = DATA[trackKey];
     const progress = (Object.keys(answers).length / track.questions.length) * 100;
-
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col items-center">
         <div className="w-full max-w-2xl space-y-8">
@@ -280,14 +275,14 @@ export default function App() {
   }
 
   if (view === 'details') return (
-    <div className="min-h-screen bg-indigo-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-indigo-900 flex flex-col items-center justify-center p-6 py-20 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-400 rounded-full blur-[120px] opacity-20 -mr-48 -mt-48"></div>
       <div className="w-full max-w-2xl bg-white p-12 md:p-16 rounded-[5rem] shadow-2xl space-y-10 animate-in zoom-in duration-500 relative z-10">
         
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <span className="text-indigo-600 font-black text-sm uppercase tracking-widest bg-indigo-50 px-5 py-2 rounded-full">Anlık Gelişim Analizi</span>
-                <h2 className="text-3xl md:text-4xl font-black text-slate-900 pt-4">Gelişimsel Ön İzlenim</h2>
+                <span className="text-indigo-600 font-black text-sm uppercase tracking-widest bg-indigo-50 px-5 py-2 rounded-full">Gelişim Analizi</span>
+                <h2 className="text-3xl md:text-4xl font-black text-slate-900 pt-4">Ön İzlenim Sonucu</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -318,15 +313,18 @@ export default function App() {
             </div>
         </div>
 
-        <div className="space-y-5 pt-8 border-t border-slate-100">
-          <div className="grid grid-cols-2 gap-5">
-            <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-slate-700 text-lg">
-              <option value="">Cinsiyet</option><option value="Erkek">Erkek</option><option value="Kız">Kız</option>
-            </select>
-            <input placeholder="Tam Yaşı" value={formData.exactAge} onChange={e => setFormData({...formData, exactAge: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-lg" />
+        <div className="space-y-8 pt-8 border-t border-slate-100">
+          <div className="space-y-4">
+              <h3 className="text-xl font-black text-indigo-900 flex items-center gap-2"><User size={20}/> İletişim ve Çocuk Bilgileri</h3>
+              <div className="grid grid-cols-2 gap-5">
+                <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-slate-700 text-lg">
+                  <option value="">Cinsiyet</option><option value="Erkek">Erkek</option><option value="Kız">Kız</option>
+                </select>
+                <input placeholder="Çocuğun Tam Yaşı" value={formData.exactAge} onChange={e => setFormData({...formData, exactAge: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-lg" />
+              </div>
+              <input placeholder="Veli Ad Soyad" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-lg" />
+              <input placeholder="Telefon (05XX...)" maxLength={11} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} className="w-full p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-2xl tracking-tighter" />
           </div>
-          <input placeholder="Veli Ad Soyad" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-lg" />
-          <input placeholder="Telefon (05XX...)" maxLength={11} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} className="w-full p-6 bg-slate-50 rounded-[2rem] border-none outline-none focus:ring-4 ring-indigo-100 font-black text-2xl tracking-tighter" />
           
           <div className="space-y-4 pt-4">
             <label className="flex items-start gap-4 p-5 bg-indigo-50/50 rounded-[2.5rem] cursor-pointer group border border-indigo-100 transition-all">
@@ -335,7 +333,7 @@ export default function App() {
             </label>
             <label className="flex items-start gap-4 p-5 bg-emerald-50/50 rounded-[2.5rem] cursor-pointer border border-emerald-100 transition-all">
               <input type="checkbox" checked={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.checked})} className="mt-1 w-6 h-6 rounded accent-emerald-600 shadow-sm" />
-              <span className="text-xs text-emerald-900 font-black leading-snug tracking-tight">Analiz detayları ve 15 dakikalık Ücretsiz Görüşme randevusu için WhatsApp üzerinden iletişime geçilmesine rıza gösteriyorum.</span>
+              <span className="text-xs text-emerald-900 font-black leading-snug tracking-tight">Analiz detayları ve randevu işlemleri için WhatsApp üzerinden iletişime geçilmesine rıza gösteriyorum.</span>
             </label>
           </div>
         </div>
