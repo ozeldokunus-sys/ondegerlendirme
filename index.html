@@ -151,19 +151,12 @@
                     };
 
                     try {
-                        // Veriler belirtilen Formspree adresine ve Make.com'a iletilir
-                        await Promise.allSettled([
-                            fetch('https://formspree.io/f/mgorekwk', { 
-                                method: 'POST', 
-                                headers: { 'Content-Type': 'application/json' }, 
-                                body: JSON.stringify(payload) 
-                            }),
-                            fetch('https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz', { 
-                                method: 'POST', 
-                                headers: { 'Content-Type': 'application/json' }, 
-                                body: JSON.stringify(payload) 
-                            })
-                        ]);
+                        // Make.com entegrasyonu kaldırıldı, sadece Formspree'ye gönderim yapılıyor
+                        await fetch('https://formspree.io/f/mgorekwk', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify(payload) 
+                        });
                         
                         setView('success');
                         
