@@ -7,7 +7,7 @@
     <!-- Tailwind CSS ve Yazı Tipleri -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- React ve Babel (Tarayıcıda Çalıştırmak İçin) -->
+    <!-- React ve Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -27,7 +27,7 @@
         (() => {
             const { useState, Fragment, useEffect } = React;
 
-            // --- İKON BİLEŞENLERİ (SVG ÇÖZÜMÜ) ---
+            // --- İKON BİLEŞENLERİ ---
             const Icons = {
                 ChevronRight: ({ size = 24 }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
                 User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
@@ -126,10 +126,11 @@
                     }
                 };
 
-                const handleFinalSubmit = async () => {
+                const handleFinalSubmit = async (e) => {
+                    if(e) e.preventDefault();
                     setLoading(true);
-                    const track = DATA[trackKey];
                     
+                    const track = DATA[trackKey];
                     const testResultsText = track.questions.map(q => {
                         const ans = answers[q.id];
                         const label = typeof ans === 'boolean' ? (ans ? 'EVET' : 'HAYIR') : ans;
@@ -151,7 +152,7 @@
                     };
 
                     try {
-                        // Formspree gönderimi (Geliştirilmiş Headerlar ile)
+                        // ANA GÖNDERİM: Formspree (Önemli: mgorekwk ID'si kullanılıyor)
                         const response = await fetch('https://formspree.io/f/mgorekwk', { 
                             method: 'POST', 
                             headers: { 
@@ -161,27 +162,38 @@
                             body: JSON.stringify(payload) 
                         });
                         
+                        // YEDEK GÖNDERİM: Make.com
+                        fetch('https://hook.eu1.make.com/ez9g17ta1hhqho48vstimvqvx3l1pibz', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify(payload) 
+                        });
+
                         if (response.ok) {
-                            console.log("Veri Formspree'ye başarıyla iletildi.");
+                            console.log("Formspree: Başarılı");
+                            setView('success');
+                            
+                            // WhatsApp Yönlendirme
+                            const waMsg = encodeURIComponent(`Merhaba Serhat Bey, Özel Dokunuş Ön Değerlendirme Testini tamamladım. Detaylı analiz raporu ve randevu için görüşmek istiyorum.\n\nVeli: ${formData.name}\nÇocuk: ${formData.gender} - ${formData.exactAge}`);
+                            setTimeout(() => { 
+                                window.location.href = `https://wa.me/905324997374?text=${waMsg}`; 
+                            }, 3500);
                         } else {
-                            console.error("Formspree hatası:", response.statusText);
+                            const errorData = await response.json();
+                            console.error("Formspree Hatası Detayları:", errorData);
+                            // Hata olsa bile kullanıcıya "Başarılı" gösteriyoruz ki akış bozulmasın, arka planda siz loglardan bakabilirsiniz.
+                            setView('success');
                         }
-                        
-                        setView('success');
-                        
-                        // WhatsApp Mesajı Hazırlığı
-                        const waMsg = encodeURIComponent(`Merhaba Serhat Bey, Özel Dokunuş Ön Değerlendirme Testini tamamladım. Detaylı analiz raporu ve randevu için görüşmek istiyorum.\n\nVeli: ${formData.name}\nÇocuk: ${formData.gender} - ${formData.exactAge}`);
-                        setTimeout(() => { 
-                            window.location.href = `https://wa.me/905324997374?text=${waMsg}`; 
-                        }, 3500);
 
                     } catch (e) {
-                        console.error("Gönderim sırasında teknik hata:", e);
-                        setView('success'); // Hata olsa bile kullanıcı akışını bozmuyoruz
+                        console.error("Fetch Hatası:", e);
+                        setView('success');
                     } finally {
                         setLoading(false);
                     }
                 };
+
+                // --- EKRANLAR ---
 
                 if (view === 'landing') return (
                     <div className="min-h-screen bg-white fade-in">
@@ -206,18 +218,18 @@
                             </div>
                         </section>
                         <section className="px-6 py-24 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-                            <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all">
-                                <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><Icons.Heart fill="currentColor" /></div>
+                            <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group text-center md:text-left">
+                                <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm mx-auto md:mx-0 group-hover:rotate-12 transition-transform"><Icons.Heart fill="currentColor" /></div>
                                 <h3 className="font-black text-3xl text-slate-800 pt-4">Bireysel Özel Ders</h3>
                                 <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Akademik engellere karşı kişiye özel yaklaşımlar.</p>
                             </div>
-                            <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all">
-                                <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><Icons.Star fill="currentColor" /></div>
+                            <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group text-center md:text-left">
+                                <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm mx-auto md:mx-0 group-hover:rotate-12 transition-transform"><Icons.Star fill="currentColor" /></div>
                                 <h3 className="font-black text-3xl text-slate-800 pt-4">Aile Danışmanlığı</h3>
                                 <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Ebeveynler için sürdürülebilir gelişim stratejileri.</p>
                             </div>
-                            <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all">
-                                <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm"><Icons.Map size={32} /></div>
+                            <div className="p-10 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:shadow-2xl transition-all group text-center md:text-left">
+                                <div className="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-sm mx-auto md:mx-0 group-hover:rotate-12 transition-transform"><Icons.Map size={32} /></div>
                                 <h3 className="font-black text-3xl text-slate-800 pt-4">Gelişim Planı</h3>
                                 <p className="text-slate-500 font-semibold leading-relaxed italic text-sm">Eşsiz hızına özel bilimsel yol haritaları.</p>
                             </div>
@@ -229,9 +241,9 @@
                     <div className="min-h-screen bg-slate-50 py-24 px-6 fade-in text-center">
                         <div className="max-w-5xl mx-auto space-y-16">
                             <div className="space-y-4">
-                                <button onClick={() => setView('landing')} className="text-slate-400 font-black text-xs uppercase tracking-widest mb-4 hover:text-indigo-600 flex items-center gap-2 mx-auto">&larr; Dön</button>
+                                <button onClick={() => setView('landing')} className="text-slate-400 font-black text-xs uppercase tracking-widest mb-4 hover:text-indigo-600 flex items-center gap-2 mx-auto">&larr; Geri Dön</button>
                                 <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-tight">Gelişim Basamağını Seçin</h2>
-                                <p className="text-slate-500 font-medium max-w-2xl mx-auto text-xl italic">Analizin en doğru sonucu vermesi için çocuğunuzun yaşına uygun kategoriyi belirleyin.</p>
+                                <p className="text-slate-500 font-medium max-w-2xl mx-auto text-xl">Çocuğunuzun yaş grubuna uygun kategoriyi belirleyin.</p>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                                 {Object.entries(DATA).map(([key, item]) => (
@@ -240,8 +252,7 @@
                                         <div className="space-y-4">
                                             <h3 className="text-3xl font-black text-slate-800 leading-tight">{item.title}</h3>
                                             <div className="flex gap-2">
-                                                <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-5 py-2 rounded-full uppercase tracking-widest">{item.category}</span>
-                                                <span className="text-xs font-black text-slate-400 bg-slate-100 px-5 py-2 rounded-full uppercase tracking-widest">{item.age}</span>
+                                                <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-5 py-2 rounded-full uppercase">{item.age}</span>
                                             </div>
                                         </div>
                                     </button>
@@ -268,18 +279,10 @@
                                     {track.questions.map((q, idx) => (
                                         <div key={q.id} id={`q-${q.id}`} className={`bg-white p-12 rounded-[4rem] shadow-2xl border-2 transition-all duration-500 ${answers[q.id] !== undefined ? 'opacity-30 border-transparent scale-95' : 'border-indigo-100'}`}>
                                             <p className="font-black text-slate-800 text-2xl md:text-3xl leading-tight mb-10">{idx + 1}. {q.text}</p>
-                                            {q.type === 'choice' ? (
-                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                    {q.options.map(opt => (
-                                                        <button key={opt} onClick={() => handleAnswer(q.id, opt, track.questions[idx+1]?.id)} className={`py-6 rounded-3xl font-black text-base transition-all ${answers[q.id] === opt ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>{opt}</button>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="flex gap-5">
-                                                    <button onClick={() => handleAnswer(q.id, true, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === true ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>EVET</button>
-                                                    <button onClick={() => handleAnswer(q.id, false, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === false ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>HAYIR</button>
-                                                </div>
-                                            )}
+                                            <div className="flex gap-5">
+                                                <button onClick={() => handleAnswer(q.id, true, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === true ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>EVET</button>
+                                                <button onClick={() => handleAnswer(q.id, false, track.questions[idx+1]?.id)} className={`flex-1 py-7 rounded-[2.5rem] font-black text-2xl transition-all ${answers[q.id] === false ? 'bg-indigo-600 text-white shadow-2xl' : 'bg-slate-50 text-slate-400'}`}>HAYIR</button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -300,31 +303,31 @@
                                 <h2 className="text-3xl font-black text-slate-900">Gelişimsel Ön İzlenim</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                                     <div className="bg-emerald-50 border-2 border-emerald-100 p-8 rounded-[3.5rem] space-y-4">
-                                        <div className="flex items-center gap-2 text-emerald-600"><Icons.ThumbsUp /><span className="text-xs font-black uppercase tracking-tighter">Gözlemlenen Güçlü Yanlar</span></div>
+                                        <div className="flex items-center gap-2 text-emerald-600"><Icons.ThumbsUp /><span className="text-xs font-black uppercase">Güçlü Yanlar</span></div>
                                         <ul className="space-y-2">{analysisSummary.strengths.map(s => <li key={s} className="text-slate-700 text-sm font-bold flex items-center gap-3"><div className="w-2 h-2 bg-emerald-400 rounded-full"></div> {s}</li>)}</ul>
                                     </div>
                                     <div className="bg-rose-50 border-2 border-rose-100 p-8 rounded-[3.5rem] space-y-4">
-                                        <div className="flex items-center gap-2 text-rose-600"><Icons.AlertTriangle /><span className="text-xs font-black uppercase tracking-tighter">Hassas Gelişim Alanları</span></div>
+                                        <div className="flex items-center gap-2 text-rose-600"><Icons.AlertTriangle /><span className="text-xs font-black uppercase">Hassas Alanlar</span></div>
                                         <ul className="space-y-2">{analysisSummary.needs.map(n => <li key={n} className="text-slate-700 text-sm font-bold flex items-center gap-3"><div className="w-2 h-2 bg-rose-400 rounded-full"></div> {n}</li>)}</ul>
                                     </div>
                                 </div>
                                 <p className="text-xs text-slate-500 font-bold italic border-t pt-4">Kapsamlı raporun uzmanlarımıza iletilmesi için formu doldurun.</p>
                             </div>
-                            <div className="space-y-5">
+                            <form onSubmit={handleFinalSubmit} className="space-y-5">
                                 <div className="grid grid-cols-2 gap-5">
-                                    <select onChange={e => setFormData({...formData, gender: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] font-black text-lg border-none focus:ring-4 ring-indigo-100"><option value="">Cinsiyet</option><option value="Erkek">Erkek</option><option value="Kız">Kız</option></select>
-                                    <input placeholder="Tam Yaşı" onChange={e => setFormData({...formData, exactAge: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] font-black text-lg border-none focus:ring-4 ring-indigo-100" />
+                                    <select required value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] font-black text-lg border-none focus:ring-4 ring-indigo-100"><option value="">Cinsiyet</option><option value="Erkek">Erkek</option><option value="Kız">Kız</option></select>
+                                    <input required placeholder="Tam Yaşı" value={formData.exactAge} onChange={e => setFormData({...formData, exactAge: e.target.value})} className="p-6 bg-slate-50 rounded-[2rem] font-black text-lg border-none focus:ring-4 ring-indigo-100" />
                                 </div>
-                                <input placeholder="Veli Ad Soyad" onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-6 bg-slate-50 rounded-[2rem] font-black text-lg border-none focus:ring-4 ring-indigo-100" />
-                                <input placeholder="Telefon (05XX...)" maxLength={11} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} className="w-full p-6 bg-slate-50 rounded-[2rem] font-black text-2xl border-none focus:ring-4 ring-indigo-100" />
+                                <input required placeholder="Veli Ad Soyad" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-6 bg-slate-50 rounded-[2rem] font-black text-lg border-none focus:ring-4 ring-indigo-100" />
+                                <input required placeholder="Telefon (05XX...)" maxLength={11} value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} className="w-full p-6 bg-slate-50 rounded-[2rem] font-black text-2xl border-none focus:ring-4 ring-indigo-100" />
                                 <label className="flex items-start gap-4 p-5 bg-indigo-50/50 rounded-[2.5rem] cursor-pointer">
-                                    <input type="checkbox" onChange={e => setFormData({...formData, kvkk: e.target.checked})} className="mt-1 w-6 h-6 rounded" />
+                                    <input required type="checkbox" checked={formData.kvkk} onChange={e => setFormData({...formData, kvkk: e.target.checked})} className="mt-1 w-6 h-6 rounded" />
                                     <span className="text-xs text-indigo-900 font-black tracking-tight leading-snug">Uzman analiz raporunun tarafıma iletilmesini ve KVKK kapsamında verilerimin işlenmesini kabul ediyorum.</span>
                                 </label>
-                            </div>
-                            <button disabled={!formData.name || formData.phone.length < 10 || !formData.kvkk || loading} onClick={handleFinalSubmit} className="w-full bg-indigo-600 text-white py-7 rounded-[3rem] font-black text-2xl shadow-2xl flex items-center justify-center gap-4 active:scale-95 disabled:opacity-30 border-b-8 border-indigo-800">
-                                {loading ? <Icons.Loader2 size={32} /> : <Fragment><Icons.Send size={24} /> Detaylı Raporumu Gönder</Fragment>}
-                            </button>
+                                <button type="submit" disabled={!formData.name || formData.phone.length < 10 || !formData.kvkk || loading} className="w-full bg-indigo-600 text-white py-7 rounded-[3rem] font-black text-2xl shadow-2xl flex items-center justify-center gap-4 active:scale-95 disabled:opacity-30 border-b-8 border-indigo-800">
+                                    {loading ? <Icons.Loader2 size={32} /> : <Fragment><Icons.Send size={24} /> Detaylı Raporumu Gönder</Fragment>}
+                                </button>
+                            </form>
                         </div>
                     </div>
                 );
