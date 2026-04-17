@@ -152,7 +152,8 @@
                     };
 
                     try {
-                        // ANA GÖNDERİM: Formspree (Önemli: mgorekwk ID'si kullanılıyor)
+                        // ANA GÖNDERİM: Formspree (mgorekwk ID'si kullanılıyor)
+                        // Önemli: Formspree reCAPTCHA ayarı panelden kapatılmalıdır.
                         const response = await fetch('https://formspree.io/f/mgorekwk', { 
                             method: 'POST', 
                             headers: { 
@@ -170,7 +171,7 @@
                         });
 
                         if (response.ok) {
-                            console.log("Formspree: Başarılı");
+                            console.log("Formspree Gönderimi: Başarılı");
                             setView('success');
                             
                             // WhatsApp Yönlendirme
@@ -180,13 +181,13 @@
                             }, 3500);
                         } else {
                             const errorData = await response.json();
-                            console.error("Formspree Hatası Detayları:", errorData);
-                            // Hata olsa bile kullanıcıya "Başarılı" gösteriyoruz ki akış bozulmasın, arka planda siz loglardan bakabilirsiniz.
+                            console.error("Formspree Hatası:", errorData);
+                            // Kullanıcıyı bekletmemek için yine de başarı ekranına geçiyoruz
                             setView('success');
                         }
 
                     } catch (e) {
-                        console.error("Fetch Hatası:", e);
+                        console.error("Teknik bir hata oluştu:", e);
                         setView('success');
                     } finally {
                         setLoading(false);
@@ -303,11 +304,11 @@
                                 <h2 className="text-3xl font-black text-slate-900">Gelişimsel Ön İzlenim</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                                     <div className="bg-emerald-50 border-2 border-emerald-100 p-8 rounded-[3.5rem] space-y-4">
-                                        <div className="flex items-center gap-2 text-emerald-600"><Icons.ThumbsUp /><span className="text-xs font-black uppercase">Güçlü Yanlar</span></div>
+                                        <div className="flex items-center gap-2 text-emerald-600"><Icons.ThumbsUp /><span className="text-xs font-black uppercase tracking-tighter">Gözlemlenen Güçlü Yanlar</span></div>
                                         <ul className="space-y-2">{analysisSummary.strengths.map(s => <li key={s} className="text-slate-700 text-sm font-bold flex items-center gap-3"><div className="w-2 h-2 bg-emerald-400 rounded-full"></div> {s}</li>)}</ul>
                                     </div>
                                     <div className="bg-rose-50 border-2 border-rose-100 p-8 rounded-[3.5rem] space-y-4">
-                                        <div className="flex items-center gap-2 text-rose-600"><Icons.AlertTriangle /><span className="text-xs font-black uppercase">Hassas Alanlar</span></div>
+                                        <div className="flex items-center gap-2 text-rose-600"><Icons.AlertTriangle /><span className="text-xs font-black uppercase tracking-tighter">Hassas Gelişim Alanları</span></div>
                                         <ul className="space-y-2">{analysisSummary.needs.map(n => <li key={n} className="text-slate-700 text-sm font-bold flex items-center gap-3"><div className="w-2 h-2 bg-rose-400 rounded-full"></div> {n}</li>)}</ul>
                                     </div>
                                 </div>
